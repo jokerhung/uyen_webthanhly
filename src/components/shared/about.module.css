@@ -1,0 +1,32 @@
+.section { background: #fff; color: #000; padding: 72px 0 90px; min-height: 1413px; }
+.container { width: 100%; max-width: 1200px; padding: 0 3%; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 108px; align-items: start; margin-bottom: 90px; }
+.heading { font-size: clamp(46.8px, 5vw, 72px); font-weight: 500; color: #000; line-height: 1.15; margin: 0 0 31.5px; }
+.body p { font-size: 16.56px; line-height: 1.8; color: #555; margin: 0 0 18px; }
+.body p:last-child { margin-bottom: 0; }
+.timeline { border-left: 1.5px solid #e0e0e0; padding-left: 36px; }
+.timelineItem { display: flex; align-items: baseline; gap: 27px; padding: 25.2px 0; border-bottom: 1px solid #3d3d3d; position: relative; }
+.timelineItem:last-child { border-bottom: 0; }
+.timelineItem::before { content: ""; position: absolute; left: -36px; top: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; }
+.timelineItem.current::before { background: #000; border-color: #000; }
+.year { font-size: 28.8px; font-weight: 500; min-width: 72px; }
+.label { font-size: 15.3px; color: #555; letter-spacing: .02em; }
+.current .label { color: #000; font-weight: 500; }
+.branches { border-top: 1px solid #e0e0e0; padding-top: 72px; }
+.tag { display: inline-block; font-size: 15.3px; font-weight: 600; color: #555; margin-bottom: 22.5px; }
+.note { font-size: 14.94px; line-height: 1.7; font-style: italic; color: rgb(85 85 85 / 80%); padding-left: 18px; border-left: 2px solid rgb(85 85 85 / 30%); margin: 0 0 27px; }
+.note strong { display: block; color: #000; font-style: normal; margin-bottom: 5.4px; }
+.branchGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+.branchGroup { background: #f2f2f2; padding: 36px 31.5px; transition: background .28s ease; }
+.branchGroup:hover { background: #e0e0e0; }
+.branchName { font-size: 19.8px; font-weight: 500; margin: 0 0 7.2px; }
+.branchDesc { font-size: 14.76px; color: #555; line-height: 1.6; margin: 0 0 22.5px; }
+.branchList { display: flex; flex-direction: column; gap: 18px; }
+.branchItem { border-top: 1px solid #e0e0e0; padding-top: 15.3px; }
+.branchItem:first-child { border: 0; padding-top: 0; }
+.address { font-size: 15.12px; color: #555; margin: 0 0 7.2px; }
+.directions { display: block; margin-top: 10.8px; color: #555; font-size: 12.96px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; gap: 54px; } }
+@media (max-width: 640px) { .branchGrid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .section { min-height: 0; } }
+@media (prefers-reduced-motion: reduce) { .branchGroup { transition: none; } }

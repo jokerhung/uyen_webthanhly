@@ -1,0 +1,11 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; background: #000; color: #fff; line-height: 1.65; }
+.content { min-height: 100vh; padding-top: 90px; display: flex; flex-direction: column; }
+.menu { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px; }
+.title { font-size: clamp(54px, 10vw, 108px); font-weight: 500; line-height: 1.1; margin: 0 0 72px; }
+.nav { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 45px 90px; width: 100%; padding: 0; margin: 0; }
+.nav a { position: relative; padding: 7.2px 0; color: rgb(255 255 255 / 85%); font-size: 23.4px; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; transition: color .28s ease, letter-spacing .28s ease; }
+.nav a::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 0; height: 1px; background: #fff; transition: width .3s, left .3s; }
+.nav a:hover { color: #fff; letter-spacing: .18em; }
+.nav a:hover::after { width: 100%; left: 0; }
+@media (max-width: 768px) { .nav { flex-direction: column; gap: 39.6px; } .nav a { font-size: 19.8px; } }
+@media (prefers-reduced-motion: reduce) { .nav a, .nav a::after { transition: none; } }

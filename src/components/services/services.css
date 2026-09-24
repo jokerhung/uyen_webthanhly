@@ -1,0 +1,68 @@
+/* Service-only styles reconstructed from the 2026-09-23 reference DOM and computed styles. */
+.service-page { background: #fff; color: #000; padding: 72px 0; font-size: 18px; line-height: 1.65; }
+.service-page__container { width: min(79.1%, 1120px); margin: 0 auto; }
+.service-page .section-heading { margin: 0 0 10.8px; font-size: 72px; font-weight: 500; line-height: 1; }
+.service-page .section-sub { margin: 0 0 54px; color: #555; }
+.service-page .section-sub strong { font-weight: 700; color: #000; }
+.service-page .info-block__label { margin: 0 0 22.5px; font-size: 18px; font-weight: 600; line-height: 1.65; }
+.service-page .consign__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 54px; margin-bottom: 72px; }
+.service-page .fee-table { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 18px; }
+.service-page .fee-row { display: grid; grid-template-columns: 38.5% minmax(0, 1fr); gap: 18px; padding: 17.1px 25.2px; font-size: 16.2px; line-height: 1.65; }
+.service-page .fee-row + .fee-row { border-top: 1px solid #e0e0e0; }
+.service-page .fee-row__range { font-weight: 600; }
+.service-page .fee-row--free { background: #f2f2f2; }
+.service-page .fee-note { margin: 0; padding: 12.6px 18px; border-left: 3px solid #000; border-radius: 0 4px 4px 0; background: #f2f2f2; color: #555; font-size: 14.94px; line-height: 1.55; }
+.service-page .check-list { display: flex; flex-direction: column; gap: 12.6px; padding: 0; margin: 0; list-style: none; }
+.service-page .check-list li { display: flex; gap: 13.5px; font-size: 15.84px; line-height: 1.65; }
+.service-page .check-list li::before { content: '✓'; flex: none; font-weight: 700; }
+.service-page .methods { padding: 45px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f2f2f2; }
+.service-page .methods__heading { margin-bottom: 24px; }
+.service-page .methods__tabs { display: flex; gap: 9px; margin-bottom: 36px; }
+.service-page .methods__tab { flex: none; padding: 10.8px 28.8px; border: 1px solid #000; border-radius: 3px; background: transparent; color: #000; font-family: inherit; font-size: 14.4px; font-weight: 500; line-height: normal; cursor: pointer; }
+.service-page .methods__tab.is-active { background: #000; color: #fff; }
+.service-page .methods__tab:hover:not(.is-active) { background: #e1e1e1; }
+.service-page .methods__panel { color: #000; }
+.service-page .methods__note { margin: 0 0 31.5px; color: #555; font-size: 16.2px; line-height: 1.7; }
+.service-page .steps { display: flex; flex-direction: column; gap: 18px; padding: 0; margin: 0; list-style: none; }
+.service-page .step { display: flex; align-items: start; gap: 18px; }
+.service-page .step__num { flex: 0 0 28px; display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; margin-top: 2.16px; border-radius: 50%; background: #000; color: #fff; font-size: 13.5px; font-weight: 600; line-height: 22.275px; }
+.service-page .step__text { min-width: 0; padding-top: 3.24px; font-size: 15.84px; line-height: 1.6; }
+.service-page .step__text a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.service-page .step__warning { font-weight: 400; }
+.service-page .online-consign-note { margin: 36px 0 0; padding-left: 18px; border-left: 2px solid #d0d0d0; color: rgb(85 85 85 / 85%); font-size: 14.94px; font-style: italic; line-height: 1.7; }
+.service-page .methods__submit { margin: 24px 0 0; padding: 15px 18px; background: #fff; font-size: 15px; }
+.service-page .methods__submit a { display: inline-block; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.service-page .methods__branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22.5px; margin-top: 36px; padding-top: 27px; border-top: 1px solid #d0d0d0; }
+.service-page .branch-group__name { margin: 0 0 9px; font-size: 18px; font-weight: 600; }
+.service-page .branch-group__desc { margin: 0 0 18px; font-size: 14.94px; line-height: 1.7; }
+.service-page .branch-group__list { display: flex; flex-direction: column; gap: 15px; }
+.service-page .branch-group__address, .service-page .branch-group__phone { font-size: 14.94px; line-height: 1.7; }
+.service-page .branch-group__phone { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.service-page .branch-group__copy { display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; cursor: pointer; padding: 5px; }
+.service-page .branch-group__feedback { width: 100%; font-size: 12px; }
+.service-page .branch-group__feedback:empty { display: none; }
+.service-page .buy__cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5px; margin-bottom: 72px; border-radius: 12px; overflow: hidden; background: #e0e0e0; }
+.service-page .buy-card { padding: 45px 27px; background: #f2f2f2; }
+.service-page .buy-card__name { margin: 0 0 7.2px; font-size: 21.6px; font-weight: 500; }
+.service-page .buy-card__price { color: #555; font-size: 18px; font-style: italic; }
+.service-page .buy__criteria { padding: 45px; border-radius: 12px; background: #f2f2f2; }
+.service-page .buy__criteria-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 54px; }
+.service-page .criteria-group-title { margin: 0 0 15px; font-size: 16.2px; font-weight: 600; }
+.service-page .buy__methods { margin-top: 72px; }
+@media (max-width: 900px) {
+  .service-page__container { width: 100%; padding-inline: 3%; }
+  .service-page .section-heading { font-size: 50.4px; }
+  .service-page .consign__grid, .service-page .buy__criteria-cols { grid-template-columns: 1fr; }
+  .service-page .buy__cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .service-page .consign__grid { gap: 54px; }
+  .service-page .fee-row { gap: 12px; padding: 15px 14px; font-size: 14px; }
+  .service-page .buy__cards { grid-template-columns: 1fr; }
+  .service-page .buy-card { padding: 24px 27px; }
+  .service-page .buy__criteria { padding: 27px; }
+  .service-page .methods { padding: 27px; }
+  .service-page .methods__tabs { flex-direction: column; }
+  .service-page .methods__tab { width: 100%; }
+  .service-page .methods__branches { grid-template-columns: 1fr; }
+}
