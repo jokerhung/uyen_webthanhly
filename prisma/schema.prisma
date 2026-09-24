@@ -1,0 +1,119 @@
+// Phase 1: server-only consignment data. Never expose consignor relations in public selects.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ItemStatus {
+  PENDING  @map("pending")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+  SOLD     @map("sold")
+  HIDDEN   @map("hidden")
+
+  @@map("item_status")
+}
+
+enum AdminRole {
+  ADMIN       @map("admin")
+  SUPER_ADMIN @map("super_admin")
+
+  @@map("admin_role")
+}
+
+model Consignor {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String        @db.VarChar(200)
+  phoneNormalized String        @map("phone_normalized") @db.VarChar(32)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  consignments    Consignment[]
+
+  @@index([phoneNormalized])
+  @@map("consignors")
+}
+
+model Consignment {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicCode  String    @unique @map("public_code") @db.VarChar(64)
+  consignorId String    @map("consignor_id") @db.Uuid
+  consignor   Consignor @relation(fields: [consignorId], references: [id], onDelete: Restrict)
+  note        String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  items       Item[]
+
+  @@index([consignorId])
+  @@map("consignments")
+}
+
+model Item {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  consignmentId String            @map("consignment_id") @db.Uuid
+  consignment   Consignment       @relation(fields: [consignmentId], references: [id], onDelete: Restrict)
+  slug          String            @unique @db.VarChar(200)
+  name          String            @db.VarChar(200)
+  category      String            @db.VarChar(100)
+  description   String            @db.Text
+  condition     String            @db.VarChar(200)
+  desiredPrice  Decimal?          @map("desired_price") @db.Decimal(14, 0)
+  salePrice     Decimal?          @map("sale_price") @db.Decimal(14, 0)
+  status        ItemStatus        @default(PENDING)
+  reviewedById  String?           @map("reviewed_by") @db.Uuid
+  reviewedBy    AdminUser?        @relation("ItemReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  reviewedAt    DateTime?         @map("reviewed_at") @db.Timestamptz(6)
+  publishedAt   DateTime?         @map("published_at") @db.Timestamptz(6)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  images        ItemImage[]
+  statusEvents  ItemStatusEvent[]
+
+  @@index([consignmentId])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([reviewedById])
+  @@map("items")
+}
+
+model ItemImage {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itemId     String @map("item_id") @db.Uuid
+  item       Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  storageKey String @unique @map("storage_key") @db.VarChar(512)
+  altText    String @map("alt_text") @db.VarChar(250)
+  sortOrder  Int    @default(0) @map("sort_order")
+
+  @@unique([itemId, sortOrder])
+  @@map("item_images")
+}
+
+model AdminUser {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String            @unique @db.VarChar(320)
+  passwordHash    String?           @map("password_hash") @db.Text
+  providerSubject String?           @unique @map("provider_subject") @db.VarChar(255)
+  role            AdminRole         @default(ADMIN)
+  active          Boolean           @default(false)
+  reviewedItems   Item[]            @relation("ItemReviewer")
+  statusEvents    ItemStatusEvent[]
+
+  @@map("admin_users")
+}
+
+model ItemStatusEvent {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itemId       String     @map("item_id") @db.Uuid
+  item         Item       @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  fromStatus   ItemStatus @map("from_status")
+  toStatus     ItemStatus @map("to_status")
+  actorAdminId String     @map("actor_admin_id") @db.Uuid
+  actorAdmin   AdminUser  @relation(fields: [actorAdminId], references: [id], onDelete: Restrict)
+  reason       String?    @db.Text
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([itemId, createdAt(sort: Desc)])
+  @@index([actorAdminId])
+  @@map("item_status_events")
+}
