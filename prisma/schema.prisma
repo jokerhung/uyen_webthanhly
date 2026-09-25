@@ -10,9 +10,13 @@ datasource db {
 
 enum ItemStatus {
   PENDING  @map("pending")
+  NEGOTIATING @map("negotiating")
+  RECEIVED @map("received")
   APPROVED @map("approved")
   REJECTED @map("rejected")
   SOLD     @map("sold")
+  SETTLED  @map("settled")
+  DELETED  @map("deleted")
   HIDDEN   @map("hidden")
 
   @@map("item_status")
@@ -134,8 +138,22 @@ model AdminUser {
   active          Boolean           @default(false)
   reviewedItems   Item[]            @relation("ItemReviewer")
   statusEvents    ItemStatusEvent[]
+  sessions        AdminSession[]
 
   @@map("admin_users")
+}
+
+model AdminSession {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(64)
+  adminId   String    @map("admin_id") @db.Uuid
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([adminId])
+  @@index([expiresAt])
+  @@map("admin_sessions")
 }
 
 model ItemStatusEvent {

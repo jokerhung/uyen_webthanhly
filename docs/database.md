@@ -39,11 +39,15 @@ ALLOW_SYNTHETIC_SEED=1 node prisma/seed.cjs
 $env:ALLOW_SYNTHETIC_SEED='1'; node prisma/seed.cjs
 ```
 
-The seed additionally refuses `NODE_ENV=production`. Do not run this fixture against staging or production. Configure a real admin identity through a separate, secure provisioning process; never commit a password hash copied from a real user. `admin_users` requires either a password hash or a provider subject, but Phase 1 does not implement authentication/session handling.
+The seed additionally refuses `NODE_ENV=production`. Do not run this fixture against staging or production. Phase 4 tạo tài khoản quản trị qua `node scripts/provision-admin.mjs admin@example.com < password-file` từ máy vận hành tin cậy sau migration, với file mật khẩu tạm ≥12 ký tự chỉ đọc được bởi operator và xóa an toàn ngay sau khi chạy. Không truyền mật khẩu trong argument, environment hay commit file mật khẩu; lệnh không ghi đè admin đã tồn tại. Mật khẩu được scrypt với salt riêng, phiên đăng nhập là token ngẫu nhiên chỉ lưu SHA-256 ở `admin_sessions`, cookie HttpOnly/SameSite Lax/Secure khi production. `admin_login_rate_limits` giới hạn đăng nhập thất bại theo cửa sổ thời gian. Cần HTTPS thực tế trên production để cookie Secure hoạt động; thu hồi quyền bằng `active=false` và xóa sessions của tài khoản đó. Dọn bản ghi phiên hết hạn và rate limit cũ theo lịch vận hành.
+
+### Tài khoản thử nghiệm chỉ trên máy local
+
+Theo yêu cầu kiểm thử, `node scripts/create-local-admin.mjs` tạo **một lần** tài khoản `admin` / `123456` trên đúng PostgreSQL `webkygui_dev` chạy tại `localhost` hoặc `127.0.0.1`; lệnh không thay đổi tài khoản có sẵn. Chỉ đăng nhập bằng tài khoản này khi Next.js chạy `NODE_ENV=development` trên cùng DB local. Production, preview build hoặc DB khác đều từ chối tên `admin` cả lúc đăng nhập lẫn xác thực session; không dùng tài khoản này cho dữ liệu thật hoặc expose dev server ra Internet. Tài khoản thật dùng script `provision-admin.mjs` và mật khẩu mạnh.
 
 ## Loại nghiệp vụ của phiếu
 
-Migration `20260926000000_intake_type` tạo PostgreSQL enum `intake_type` (`consign`, `buy`) và cột `consignments.intake_type` không null. Mọi phiếu cũ được giữ là `consign` vì chỉ có luồng ký gửi trước migration. `/consign/submit` gửi `consign`, `/buy/submit` gửi `buy`; API bắt buộc kiểm tra enum và lưu trên phiếu trong transaction. Cả hai tạo mặt hàng `pending`; **phiếu thu mua chỉ là yêu cầu báo giá**, không có nghĩa shop đã đồng ý thu hoặc trả tiền. Khi xây quản trị/danh sách hàng bán, phải lọc loại phiếu phù hợp; không tự xuất bản mặt hàng của phiếu thu mua như hàng ký gửi đã duyệt.
+Migration `20260926000000_intake_type` tạo PostgreSQL enum `intake_type` (`consign`, `buy`) và cột `consignments.intake_type` không null. Mọi phiếu cũ được giữ là `consign` vì chỉ có luồng ký gửi trước migration. `/consign/submit` gửi `consign`, `/buy/submit` gửi `buy`; API bắt buộc kiểm tra enum và lưu trên phiếu trong transaction. Cả hai tạo mặt hàng `pending`; **phiếu thu mua chỉ là yêu cầu báo giá**, không có nghĩa shop đã đồng ý thu hoặc trả tiền. Quản trị Phase 4 không cho duyệt và xuất bản trực tiếp mặt hàng thuộc phiếu `buy`: loại phiếu này cần quy trình báo giá/thỏa thuận thu mua riêng chưa được định nghĩa. Danh mục công khai về sau phải lọc loại phiếu phù hợp.
 
 ## Item categories
 

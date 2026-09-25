@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const routes = ["/", "/about", "/consign", "/buy", "/sales", "/consign/submit", "/buy/submit", "/items", "/items/demo", "/admin/login", "/admin/items", "/admin/items/demo", "/admin/consignments", "/admin/consignments/demo"];
+const routes = ["/", "/about", "/consign", "/buy", "/sales", "/consign/submit", "/buy/submit", "/items", "/items/demo", "/admin/login"];
 for (const route of routes) {
   test(`skeleton loads ${route}`, async ({ page }) => {
     await page.goto(route);
