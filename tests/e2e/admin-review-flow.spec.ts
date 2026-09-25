@@ -3,6 +3,7 @@ import { randomUUID, randomBytes, scryptSync } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const listing = { genderId: "gender-unisex", seasonId: "season-summer", category: "ao", materialId: "material-cotton", sizeId: "size-m", brandId: "brand-no-brand", priceOptionId: "price-120000" };
 test.afterAll(async () => { await prisma.$disconnect(); });
 test.describe("admin review in disposable database", () => {
   test.skip(process.env.RUN_ADMIN_DB_E2E !== "1", "Only run against an isolated disposable DB");
@@ -43,9 +44,9 @@ test.describe("admin review in disposable database", () => {
     expect(negotiating.status()).toBe(200);
     const received = await request.patch(url, { headers: mutationHeaders, data: { action: "receive", expectedStatus: "NEGOTIATING" } });
     expect(received.status()).toBe(200);
-    const approved = await request.patch(url, { headers: mutationHeaders, data: { action: "approve", expectedStatus: "RECEIVED", salePrice: 120000 } });
+    const approved = await request.patch(url, { headers: mutationHeaders, data: { action: "approve", expectedStatus: "RECEIVED", ...listing } });
     expect(approved.status(), await approved.text()).toBe(200);
-    const conflict = await request.patch(url, { headers: mutationHeaders, data: { action: "approve", expectedStatus: "RECEIVED", salePrice: 900000 } });
+    const conflict = await request.patch(url, { headers: mutationHeaders, data: { action: "approve", expectedStatus: "RECEIVED", ...listing } });
     expect(conflict.status()).toBe(409);
     const item = await prisma.item.findUnique({ where: { id: pending.id }, include: { statusEvents: true } });
     expect(item?.salePrice?.toNumber()).toBe(120000);

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { AnnouncementTicker, SiteFooter } from "@/components/shared/site-chrome";
 import styles from "@/components/shared/home.module.css";
+import CatalogPage from "@/components/catalog/catalog-page";
+
+export const dynamic = "force-dynamic";
 
 const routes = [
   ["Giới Thiệu", "/about"],
@@ -20,8 +23,12 @@ export default function Home() {
             {routes.map(([label, href]) => <li key={href}><Link href={href}>{label}</Link></li>)}
           </ul>
         </nav>
+        <a href="#hang-dang-ban" className={styles.scrollHint}>Cuộn tiếp để xem hàng đang bán<span aria-hidden="true">↓</span></a>
       </div>
-      <SiteFooter />
+      <section id="hang-dang-ban" className={styles.catalogSection} aria-label="Hàng đang bán">
+        <CatalogPage searchParams={Promise.resolve({})} />
+      </section>
     </main>
+    <SiteFooter />
   </div>;
 }

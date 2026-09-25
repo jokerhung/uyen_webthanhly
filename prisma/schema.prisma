@@ -77,6 +77,24 @@ model IntakeRequest {
   @@map("intake_requests")
 }
 
+model ListingOption {
+  id String @id @db.VarChar(100)
+  kind String @db.VarChar(20)
+  label String @db.VarChar(100)
+  amount Decimal? @db.Decimal(14, 0)
+  active Boolean @default(true)
+  sortOrder Int @default(0) @map("sort_order")
+  seasonItems Item[] @relation("Season")
+  genderItems Item[] @relation("Gender")
+  materialItems Item[] @relation("Material")
+  sizeItems Item[] @relation("Size")
+  brandItems Item[] @relation("Brand")
+  priceItems Item[] @relation("Price")
+
+  @@index([kind, active, sortOrder])
+  @@map("listing_options")
+}
+
 model ItemCategory {
   slug      String  @id @db.VarChar(100)
   name      String  @unique @db.VarChar(100)
@@ -89,6 +107,18 @@ model ItemCategory {
 }
 
 model Item {
+  genderId String? @map("gender_id") @db.VarChar(100)
+  gender ListingOption? @relation("Gender", fields: [genderId], references: [id], onDelete: Restrict)
+  seasonId String? @map("season_id") @db.VarChar(100)
+  materialId String? @map("material_id") @db.VarChar(100)
+  sizeId String? @map("size_id") @db.VarChar(100)
+  brandId String? @map("brand_id") @db.VarChar(100)
+  priceOptionId String? @map("price_option_id") @db.VarChar(100)
+  season ListingOption? @relation("Season", fields: [seasonId], references: [id], onDelete: Restrict)
+  material ListingOption? @relation("Material", fields: [materialId], references: [id], onDelete: Restrict)
+  size ListingOption? @relation("Size", fields: [sizeId], references: [id], onDelete: Restrict)
+  brand ListingOption? @relation("Brand", fields: [brandId], references: [id], onDelete: Restrict)
+  priceOption ListingOption? @relation("Price", fields: [priceOptionId], references: [id], onDelete: Restrict)
   id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   consignmentId String            @map("consignment_id") @db.Uuid
   consignment   Consignment       @relation(fields: [consignmentId], references: [id], onDelete: Restrict)

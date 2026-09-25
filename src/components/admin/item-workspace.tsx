@@ -5,8 +5,11 @@ import { ItemGallery } from "./item-gallery";
 import { ItemActions } from "./item-actions";
 import { itemStatusLabels } from "@/lib/admin/item-status";
 import "./item-workspace.css";
+import { prisma } from "@/lib/db/client";
+import type { ListingOptions } from "@/types/listing-options";
 
 export const itemWorkspaceInclude = {
+  categoryRecord: true, gender: true, season: true, material: true, size: true, brand: true,
   consignment: { include: { consignor: true } },
   images: { orderBy: { sortOrder: "asc" as const } },
   statusEvents: { orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }], include: { actorAdmin: { select: { email: true } } } },
@@ -15,7 +18,13 @@ export const itemWorkspaceInclude = {
 
 type WorkspaceItem = Prisma.ItemGetPayload<{ include: typeof itemWorkspaceInclude }>;
 
-export function ItemWorkspace({ item }: { item: WorkspaceItem }) {
+export async function ItemWorkspace({ item }: { item: WorkspaceItem }) {
+  const [choices, categories] = await Promise.all([
+    prisma.listingOption.findMany({ where: { active: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, label: true, kind: true } }),
+    prisma.itemCategory.findMany({ where: { active: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { slug: true, name: true } }),
+  ]);
+  const byKind = (kind: string) => choices.filter(choice => choice.kind === kind).map(({ id, label }) => ({ id, label }));
+  const listingOptions: ListingOptions = { genderId: byKind("gender"), seasonId: byKind("season"), category: categories.map(category => ({ id: category.slug, label: category.name })), materialId: byKind("material"), sizeId: byKind("size"), brandId: byKind("brand"), priceOptionId: byKind("price") };
   return <div className="item-workspace">
     <ItemGallery key={item.id} images={item.images} name={item.name} />
     <div className="item-workspace__information">
@@ -25,10 +34,10 @@ export function ItemWorkspace({ item }: { item: WorkspaceItem }) {
         <div className="item-workspace__price"><strong>{money(item.salePrice ?? item.desiredPrice)}</strong><span>{item.salePrice == null ? "Giá mong muốn" : "Giá bán"}</span></div>
       </header>
       <div className="item-workspace__status"><StatusBadge status={item.status} /><span>{item.consignment.intakeType === "BUY" ? "Thu mua" : "Ký gửi"} · {date(item.consignment.createdAt)}</span></div>
-      <div className="item-workspace__actions"><ItemActions key={`${item.id}-${item.status}`} id={item.id} status={item.status} intakeType={item.consignment.intakeType} /></div>
+      <div className="item-workspace__actions"><ItemActions key={`${item.id}-${item.status}`} id={item.id} status={item.status} intakeType={item.consignment.intakeType} listingOptions={listingOptions} initialListing={{ genderId: item.genderId ?? "", seasonId: item.seasonId ?? "", category: item.category, materialId: item.materialId ?? "", sizeId: item.sizeId ?? "", brandId: item.brandId ?? "", priceOptionId: item.priceOptionId ?? "" }} /></div>
       <details className="item-workspace__section" open><summary>Mô tả</summary><div className="item-workspace__section-body">
         <p className="item-workspace__description">{item.description}</p>
-        <dl><dt>Danh mục</dt><dd>{item.category}</dd><dt>Tình trạng</dt><dd>{item.condition}</dd><dt>Giá mong muốn</dt><dd>{money(item.desiredPrice)}</dd><dt>Giá bán</dt><dd>{money(item.salePrice)}</dd></dl>
+        <dl><dt>Giới tính</dt><dd>{item.gender?.label ?? "—"}</dd><dt>Mùa</dt><dd>{item.season?.label ?? "—"}</dd><dt>Danh mục</dt><dd>{item.categoryRecord.name}</dd><dt>Chất liệu</dt><dd>{item.material?.label ?? "—"}</dd><dt>Kích thước</dt><dd>{item.size?.label ?? "—"}</dd><dt>Nhãn hiệu</dt><dd>{item.brand?.label ?? "—"}</dd><dt>Tình trạng</dt><dd>{item.condition}</dd><dt>Giá mong muốn</dt><dd>{money(item.desiredPrice)}</dd><dt>Giá bán</dt><dd>{money(item.salePrice)}</dd></dl>
       </div></details>
       <details className="item-workspace__section" open><summary>Thông tin ký gửi</summary><div className="item-workspace__section-body">
         <p className="item-workspace__private">Chỉ hiển thị với quản trị viên</p>

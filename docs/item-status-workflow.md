@@ -1,5 +1,7 @@
 # Quy trình trạng thái mặt hàng
 
+Khi chuyển sang Đang bán phải chọn đủ mùa, category, chất liệu, kích thước, nhãn hiệu và giá từ database. Xem [danh mục thông tin đăng bán](listing-options.md); quy tắc này thay cho việc nhập trực tiếp giá bán.
+
 Quy trình hiện tại thay thế luồng duyệt/từ chối trước đây trong các tài liệu phase.
 
 | Hiển thị | Prisma | PostgreSQL |
