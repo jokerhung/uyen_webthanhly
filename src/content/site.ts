@@ -7,8 +7,8 @@ function optionalPositiveInt(value: string | undefined): number | null {
 }
 export function getSiteConfig(): SiteConfig {
   return {
-    brand: "H.U.N",
-    shopPhone: process.env.SHOP_PHONE?.trim() || null,
+    brand: "Besties Club",
+    shopPhone: process.env.SHOP_PHONE?.trim() || "098 648 99 42",
     minimumConsignmentItems: optionalPositiveInt(process.env.MIN_CONSIGNMENT_ITEMS),
     maxImagesPerItem: optionalPositiveInt(process.env.MAX_IMAGES_PER_ITEM),
     maxImageBytes: optionalPositiveInt(process.env.MAX_IMAGE_BYTES),

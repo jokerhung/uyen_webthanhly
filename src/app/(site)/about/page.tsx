@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { aboutParagraphs, timeline } from "@/content/about";
+import { aboutParagraphs } from "@/content/about";
 import { branchGroups, openingHours } from "@/content/branches";
 import { getSiteConfig } from "@/content/site";
 import { CopyHotline } from "@/components/shared/copy-hotline";
 import styles from "@/components/shared/about.module.css";
+import { brand } from "@/content/brand";
 
-export const metadata: Metadata = { title: "Giới thiệu H.U.N" };
+export const metadata: Metadata = { title: "Giới thiệu Besties Club" };
 
 export default function AboutPage() {
   const { shopPhone } = getSiteConfig();
@@ -14,18 +15,14 @@ export default function AboutPage() {
     <div className={styles.container}>
       <div className={styles.grid}>
         <div>
-          <h1 className={styles.heading}>Chào bạn, chúng mình là H.U.N</h1>
+          <h1 className={styles.heading}>Chào bạn, chúng mình là Besties Club</h1>
           <div className={styles.body}>{aboutParagraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
         </div>
-        <div className={styles.timeline} aria-label="Các cột mốc của H.U.N">
-          {timeline.map(({ year, label, current }) => <div key={year} className={`${styles.timelineItem} ${current ? styles.current : ""}`}>
-            <span className={styles.year}>{year}</span><span className={styles.label}>{label}</span>
-          </div>)}
-        </div>
+        <aside className={styles.brandPanel}><p>BESTIES</p><em>Club</em><span>{brand.tagline}</span><a href={brand.facebook} target="_blank" rel="noreferrer">Gặp Besties trên Facebook ↗</a></aside>
       </div>
       <div className={styles.branches}>
-        <h2 className={styles.tag}>3 cơ sở tại Hà Nội</h2>
-        <p className={styles.note}><strong>Lưu ý:</strong>— H.U.N hiện chỉ bán tại cửa hàng<br />— Thời gian: {openingHours} hàng ngày</p>
+        <h2 className={styles.tag}>Ghé Besties Club tại Hà Nội</h2>
+        <p className={styles.note}>Giờ mở cửa: {openingHours}<br /><a href={`mailto:${brand.email}`}>{brand.email}</a></p>
         <div className={styles.branchGrid}>
           {branchGroups.map((group) => <div className={styles.branchGroup} key={group.name}>
             <h3 className={styles.branchName}>{group.name}</h3>
@@ -34,7 +31,7 @@ export default function AboutPage() {
               {group.branches.map((branch) => <div className={styles.branchItem} key={branch.id}>
                 <p className={styles.address}>📍 {branch.address}</p>
                 <CopyHotline phone={shopPhone} />
-                <span className={styles.directions} title="Chưa xác minh địa chỉ liên kết">Tìm đường · liên kết chưa xác minh</span>
+                <a className={styles.directions} href={brand.facebook} target="_blank" rel="noreferrer">Liên hệ qua Facebook</a>
               </div>)}
             </div>
           </div>)}

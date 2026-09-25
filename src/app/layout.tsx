@@ -6,8 +6,8 @@ import { indexingAllowed } from "@/lib/catalog/indexing";
 const montserrat = Montserrat({ subsets: ["latin", "vietnamese"], variable: "--font-montserrat", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "H.U.N — Ký gửi & thu mua", template: "%s | H.U.N" },
-  description: "Nền tảng giới thiệu dịch vụ ký gửi, thu mua và quản lý mặt hàng của H.U.N.",
+  title: { default: "Besties Club — Ký gửi & thu mua", template: "%s | Besties Club" },
+  description: "Nền tảng giới thiệu dịch vụ ký gửi, thu mua và quản lý mặt hàng của Besties Club.",
   robots: { index: indexingAllowed(), follow: indexingAllowed() },
 };
 

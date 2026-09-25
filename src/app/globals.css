@@ -2,11 +2,11 @@
 
 :root {
   /* Provisional values: verify against captured reference before Phase 2. */
-  --background: #ffffff;
-  --foreground: #111111;
-  --surface: #f3f3f3;
-  --border: #e5e5e5;
-  --accent: #e4d693;
+  --background: #fffaf3;
+  --foreground: #4b2918;
+  --surface: #f6ecdc;
+  --border: #dfceb7;
+  --accent: #b38b60;
   --radius: 0.25rem;
 }
 
@@ -26,3 +26,7 @@ body { margin: 0; background: var(--background); color: var(--foreground); font-
 .container-site { width: min(100% - 3rem, 70rem); margin-inline: auto; }
 @media (min-width: 768px) { .container-site { width: min(100% - 6rem, 70rem); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+.besties-site h1, .besties-site h2 { color: var(--foreground); }
+.besties-site .service-page { background: var(--background); color: var(--foreground); }
+.besties-site .methods, .besties-site .branch-group { background: var(--surface); }
+.besties-site .methods__tab.is-active, .besties-site .step__num, .besties-site .consignment-button { background: var(--foreground); color: var(--background); }

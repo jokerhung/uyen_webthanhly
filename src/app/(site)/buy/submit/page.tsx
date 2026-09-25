@@ -3,7 +3,7 @@ import { ConsignmentForm } from "@/components/consignments/consignment-form";
 import { getSiteConfig } from "@/content/site";
 import { prisma } from "@/lib/db/client";
 
-export const metadata: Metadata = { title: "Gửi yêu cầu thu mua | H.U.N", description: "Gửi thông tin mặt hàng để shop xem xét báo giá thu mua; chưa phải thỏa thuận bán." };
+export const metadata: Metadata = { title: "Gửi yêu cầu thu mua | Besties Club", description: "Gửi thông tin mặt hàng để shop xem xét báo giá thu mua; chưa phải thỏa thuận bán." };
 export const dynamic = "force-dynamic";
 
 export default async function BuySubmitPage() {

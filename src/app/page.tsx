@@ -17,7 +17,8 @@ export default function Home() {
     <AnnouncementTicker />
     <main className={styles.content}>
       <div className={styles.menu}>
-        <h1 className={styles.title}>H.U.N</h1>
+        <h1 className={styles.title}>Besties Club</h1>
+        <p className={styles.brandSubtitle}>Thanh lý ký gửi · From one bestie to another ♡</p>
         <nav aria-label="Điều hướng chính">
           <ul className={styles.nav}>
             {routes.map(([label, href]) => <li key={href}><Link href={href}>{label}</Link></li>)}

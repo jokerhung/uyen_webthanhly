@@ -1,36 +1,15 @@
 import type { BuyPrice, CriteriaGroup, ServiceProcesses } from "@/types/services";
-
-/** Reference-site public copy captured 2026-09-23; pricing and campaign availability require confirmation. */
-export const buyAnnouncement = [
-  "Thu mua chỉ áp dụng ngắn ngày theo chương trình được thông báo trên TikTok & Facebook.",
-  "Riêng H.U.N Premium nhận thu mua phụ kiện chính hãng quanh năm.",
-] as const;
-export const buyPrices: readonly BuyPrice[] = [
-  { name: "Đồ No Brand", price: "80k – 100k / kg" },
-  { name: "Đồ Brand", price: "150k – 200k / kg" },
-  { name: "Phụ kiện", price: "Báo giá theo chiếc" },
-];
-export const buyCriteria: readonly CriteriaGroup[] = [
-  { title: "Đối với quần áo:", items: ["Quần áo độ mới cao trên 90%", "Không thu đồ quá dày như áo dạ dài, đồ đính đá nhiều hay dây xích nặng"] },
-  { title: "Đối với phụ kiện:", items: ["Túi xách, giày dép cần được lau sạch, không bong tróc da"] },
-];
+import { brand } from "./brand";
+export const buyAnnouncement = ["Liên hệ Besties Club để xác nhận chương trình thu mua và mặt hàng đang tiếp nhận."] as const;
+export const buyPrices: readonly BuyPrice[] = [{ name: "Báo giá mặt hàng", price: "Liên hệ shop" }];
+export const buyCriteria: readonly CriteriaGroup[] = [{ title: "Trước khi gửi yêu cầu:", items: ["Chuẩn bị ảnh rõ và mô tả tình trạng thực tế.", "Shop xem xét từng mặt hàng và trao đổi điều kiện thu mua trực tiếp."] }];
 export const buyProcesses: ServiceProcesses = {
-  direct: {
-    label: "Thu Mua Trực Tiếp",
-    note: "Khuyên dùng cho khách nội thành Hà Nội — trao đổi giá bán trực tiếp với nhân viên.",
-    steps: [
-      { text: "Gọi hotline để được tư vấn và sắp lịch", detail: "Khung giờ trực hotline: 10h–20h30" },
-      { text: "Mang đồ tới H.U.N.", detail: "Nhân viên kiểm tra và định giá trực tiếp" },
-      { text: "Xác nhận giá thu mua", detail: "Thoả thuận giá thu với nhân viên và thanh toán ngay tại chỗ" },
-    ],
-  },
-  online: {
-    label: "Thu Mua Online",
-    steps: [
-      { text: "Chụp ảnh túi đồ, gửi ảnh kèm SĐT qua Zalo chính thức của H.U.N - ", link: { label: "Nhấn tại đây", href: "https://zalo.me/hunthanhly" }, warning: "Lưu ý: Đồ có giá trị cao H.U.N chỉ nhận trực tiếp KHÔNG NHẬN SHIP" },
-      { text: 'Dán thông tin "Tên + SĐT" lên túi, ship trong khung giờ 10h–20h30' },
-      { text: "Nhận báo giá qua Zalo trong 10-15 ngày" },
-      { text: "Xác nhận và H.U.N sẽ thanh toán ngay" },
-    ],
-  },
+ direct: { label: "Thu Mua Trực Tiếp", note: "Vui lòng liên hệ shop trước khi mang đồ tới.", steps: [
+ { text: `Gọi ${brand.phone} hoặc nhắn fanpage để được tư vấn` },
+ { text: `Mang đồ tới ${brand.address} theo lịch đã thống nhất` },
+ { text: "Shop kiểm tra và trao đổi giá, phương thức thanh toán" }] },
+ online: { label: "Thu Mua Online", steps: [
+ { text: "Gửi ảnh và thông tin mặt hàng qua form yêu cầu thu mua" },
+ { text: "Chờ shop liên hệ và trao đổi báo giá" },
+ { text: "Thống nhất cách giao nhận và thanh toán với shop" }] },
 };
