@@ -1,0 +1,26 @@
+/* Native disclosure: independent of JavaScript hydration and overlay positioning. */
+.catalog-shop--native { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; align-items: start; }
+.catalog-shop--native .catalog-shop__toolbar { grid-column: 1; grid-row: 1; min-height: 44px; margin-bottom: 24px; }
+.catalog-shop--native > .catalog-shop__results { grid-column: 1 / -1; grid-row: 2; }
+.catalog-filter-disclosure { grid-column: 2; grid-row: 1 / span 2; z-index: 1; }
+.catalog-filter-disclosure > summary { cursor: pointer; list-style: none; min-height: 44px; display: flex; align-items: center; justify-content: flex-end; font-size: 12px; text-transform: uppercase; padding: 0 10px; }
+.catalog-filter-disclosure > summary::-webkit-details-marker { display: none; }
+.catalog-filter-disclosure__opened { display: none; }
+.catalog-filter-disclosure[open] .catalog-filter-disclosure__opened { display: inline; }
+.catalog-filter-disclosure[open] .catalog-filter-disclosure__closed { display: none; }
+.catalog-filter-disclosure[open] { width: 340px; }
+.catalog-shop--native:has(> .catalog-filter-disclosure[open]) > .catalog-shop__results { grid-column: 1; }
+.catalog-shop--native:has(> .catalog-filter-disclosure[open]) .catalog__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.catalog-shop--native .catalog-filters { position: static; inset: auto; height: auto; max-height: none; padding: 24px 10px 0; overflow: visible; }
+.catalog-shop--native .catalog-filters form { height: auto; }
+.catalog-shop--native .catalog-filters__fields { overflow: visible; }
+.catalog-shop--native .catalog-filters__footer { position: static; }
+@media (max-width: 1100px) and (min-width: 701px) { .catalog-filter-disclosure[open] { width: 290px; } .catalog-shop--native:has(> .catalog-filter-disclosure[open]) .catalog__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .catalog-shop--native { display: block; }
+  .catalog-shop--native .catalog-shop__toolbar { padding-right: 130px; margin-bottom: 24px; }
+  .catalog-filter-disclosure, .catalog-filter-disclosure[open] { width: 100%; }
+  .catalog-filter-disclosure > summary { position: absolute; top: 75px; right: 10px; }
+  .catalog-shop--native .catalog-filters { width: 100%; padding: 16px; margin-bottom: 24px; border: 1px solid #dfceb7; box-shadow: none; }
+  .catalog-shop--native:has(> .catalog-filter-disclosure[open]) .catalog__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -8,6 +8,7 @@ export type SettlementReport = Readonly<{
   netAmount: number;
 }>;
 export type LookupResult =
+  | { kind: "receipts"; reports: { code: string; receivedAt: string; itemCount: number; statuses: { label: string; count: number }[] }[] }
   | { kind: "success"; report: SettlementReport }
   | { kind: "empty" }
   | { kind: "error" }
