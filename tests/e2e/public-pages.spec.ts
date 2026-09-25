@@ -1,25 +1,23 @@
 import { test, expect } from "@playwright/test";
 
-test("service modes support mouse and keyboard", async ({ page }) => {
-  for (const [route, direct, online] of [["/consign", 4, 5], ["/buy", 3, 4]] as const) {
-    await page.goto(route);
-    await page.waitForLoadState("networkidle");
-    const tabs = page.getByRole("tab");
-    await expect(tabs).toHaveCount(2);
-    await expect(page.getByRole("tabpanel").locator("li")).toHaveCount(direct);
-    await tabs.nth(0).focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("tabpanel").locator("li")).toHaveCount(online);
-  }
+test("online buy directly opens its submission form", async ({ page }) => {
+  await page.goto("/buy");
+  await expect(page.locator(".methods__panel li")).toHaveCount(3);
+  await page.getByRole("link", { name: "Thu Mua Online" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/buy\/submit$/);
+  await expect(page.getByRole("heading", { name: "Gửi yêu cầu thu mua" })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/buy$/);
 });
 
-test("online consign links to form placeholder", async ({ page }) => {
+test("clicking Ký Gửi Online directly opens the submission page", async ({ page }) => {
   await page.goto("/consign");
-  await page.waitForLoadState("networkidle");
-  await page.getByRole("tab").nth(1).click();
-  await page.getByRole("link", { name: /gửi ký gửi online/i }).click();
+  await page.getByRole("link", { name: "Ký Gửi Online" }).click();
   await expect(page).toHaveURL(/\/consign\/submit$/);
+  await expect(page.getByRole("heading", { name: "Gửi hàng ký gửi" })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/consign$/);
 });
 
 test("public routes do not overflow mobile viewport", async ({ page }) => {

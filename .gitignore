@@ -22,6 +22,8 @@
 # production
 /build
 
+# private uploads and local data
+/.private/
 # misc
 .DS_Store
 *.pem

@@ -18,6 +18,13 @@ enum ItemStatus {
   @@map("item_status")
 }
 
+enum IntakeType {
+  CONSIGN @map("consign")
+  BUY     @map("buy")
+
+  @@map("intake_type")
+}
+
 enum AdminRole {
   ADMIN       @map("admin")
   SUPER_ADMIN @map("super_admin")
@@ -39,15 +46,42 @@ model Consignor {
 model Consignment {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   publicCode  String    @unique @map("public_code") @db.VarChar(64)
+  intakeType  IntakeType @default(CONSIGN) @map("intake_type")
   consignorId String    @map("consignor_id") @db.Uuid
   consignor   Consignor @relation(fields: [consignorId], references: [id], onDelete: Restrict)
   note        String?   @db.Text
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   items       Item[]
+  intakeRequests IntakeRequest[]
 
   @@index([consignorId])
+  @@index([intakeType, createdAt(sort: Desc)])
   @@map("consignments")
+}
+
+// Idempotency keys are scoped to one submitted payload and retained for safe retries.
+model IntakeRequest {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key            String      @unique @db.VarChar(128)
+  payloadHash    String      @map("payload_hash") @db.VarChar(64)
+  consignmentId  String      @map("consignment_id") @db.Uuid
+  consignment    Consignment @relation(fields: [consignmentId], references: [id], onDelete: Restrict)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@map("intake_requests")
+}
+
+model ItemCategory {
+  slug      String  @id @db.VarChar(100)
+  name      String  @unique @db.VarChar(100)
+  sortOrder Int     @default(0) @map("sort_order")
+  active    Boolean @default(true)
+  items     Item[]
+
+  @@index([active, sortOrder])
+  @@map("item_categories")
 }
 
 model Item {
@@ -57,6 +91,7 @@ model Item {
   slug          String            @unique @db.VarChar(200)
   name          String            @db.VarChar(200)
   category      String            @db.VarChar(100)
+  categoryRecord ItemCategory      @relation(fields: [category], references: [slug], onDelete: Restrict, onUpdate: Restrict)
   description   String            @db.Text
   condition     String            @db.VarChar(200)
   desiredPrice  Decimal?          @map("desired_price") @db.Decimal(14, 0)
@@ -72,6 +107,7 @@ model Item {
   statusEvents  ItemStatusEvent[]
 
   @@index([consignmentId])
+  @@index([category])
   @@index([status, publishedAt(sort: Desc)])
   @@index([reviewedById])
   @@map("items")

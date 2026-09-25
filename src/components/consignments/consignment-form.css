@@ -1,0 +1,34 @@
+.consignment-page { padding-block: 3.5rem 6rem; }
+.consignment-page__intro { max-width: 48rem; margin-bottom: 3rem; }
+.consignment-page h1 { font-size: clamp(2.25rem, 6vw, 4rem); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.consignment-page__intro p { margin-top: 1rem; line-height: 1.8; }
+.consignment-form { display: grid; gap: 2.5rem; max-width: 52rem; }
+.consignment-form h2, .consignment-success h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1.1rem; }
+.consignment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.consignment-field { display: grid; gap: .45rem; min-width: 0; margin-bottom: 1rem; }
+.consignment-field label { font-size: .9rem; font-weight: 600; }
+.consignment-field input:not([type=file]), .consignment-field textarea, .consignment-field select { border: 1px solid #aaa; background: #fff; color: #111; padding: .8rem; border-radius: .2rem; width: 100%; }
+.consignment-field input[type=file] { max-width: 100%; padding: .7rem 0; }
+.consignment-field [aria-invalid=true] { border-color: #ad2424; }
+.consignment-hint { color: #555; font-size: .875rem; line-height: 1.6; margin-bottom: 1rem; }
+.consignment-error { color: #a61c1c; font-size: .875rem; }
+.consignment-item { border: 1px solid #d4d4d4; padding: 1.25rem; margin-block: 1.3rem; background: #f8f8f8; min-width: 0; }
+.consignment-item legend { font-weight: 700; padding-inline: .3rem; }
+.consignment-remove { display: block; margin-left: auto; color: #8e2020; text-decoration: underline; margin-bottom: 1rem; }
+.consignment-file-list { display: grid; gap: .5rem; font-size: .875rem; overflow-wrap: anywhere; }
+.consignment-file-list li { display: flex; justify-content: space-between; align-items: start; gap: .75rem; }
+.consignment-file-list button { color: #8e2020; text-decoration: underline; flex: none; }
+.consignment-button { background: #111; color: #fff; padding: .9rem 1.35rem; border: 1px solid #111; letter-spacing: .03em; font-weight: 600; }
+.consignment-button--secondary { background: #fff; color: #111; }
+.consignment-button:disabled, .consignment-remove:disabled { opacity: .5; cursor: not-allowed; }
+.consignment-unavailable { padding: 1.25rem; border: 1px solid #a61c1c; background: #fff6f4; color: #8e2020; font-weight: 600; line-height: 1.7; }
+.consignment-notice { padding: 1.25rem; border-left: 3px solid #b19c50; background: #f6f5ed; line-height: 1.7; }
+.consignment-notice p { margin-bottom: 1rem; }
+.consignment-check { display: flex; gap: .7rem; align-items: start; cursor: pointer; }
+.consignment-check input { margin-top: .35rem; flex: none; width: 1.1rem; height: 1.1rem; }
+.consignment-actions { display: grid; justify-items: start; gap: 1rem; min-height: 6rem; }
+.consignment-actions p { color: #a61c1c; }
+.consignment-success { border: 1px solid #d4d4d4; background: #f8f8f8; max-width: 45rem; padding: 2rem; line-height: 1.8; }
+.consignment-success p { margin-bottom: 1rem; }
+.consignment-code { font-size: 1.25rem; letter-spacing: .1em; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .consignment-page { padding-block: 2rem 4rem; } .consignment-grid { grid-template-columns: 1fr; gap: 0; } .consignment-item { padding: 1rem; } }

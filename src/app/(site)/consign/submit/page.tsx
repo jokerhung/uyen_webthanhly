@@ -1,3 +1,17 @@
-﻿import { SectionPlaceholder } from "@/components/layout/section-placeholder";
-export default function Page() { return <SectionPlaceholder title="Gửi hàng ký gửi" description="Form ký gửi online sẽ được triển khai ở giai đoạn 3." />; }
+import type { Metadata } from "next";
+import { ConsignmentForm } from "@/components/consignments/consignment-form";
+import { getSiteConfig } from "@/content/site";
+import { prisma } from "@/lib/db/client";
 
+export const metadata: Metadata = { title: "Gửi hàng ký gửi | H.U.N", description: "Gửi phiếu ký gửi và hình ảnh mặt hàng để H.U.N xem xét." };
+
+export const dynamic = "force-dynamic";
+
+export default async function ConsignmentSubmitPage() {
+  const { minimumConsignmentItems, maxImagesPerItem, maxImageBytes, privacyPolicyReviewed } = getSiteConfig();
+  const categories = await prisma.itemCategory.findMany({ where: { active: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { slug: true, name: true } });
+  return <section className="consignment-page container-site" aria-labelledby="consignment-heading">
+    <div className="consignment-page__intro"><h1 id="consignment-heading">Gửi hàng ký gửi</h1><p>Điền thông tin liên hệ và từng mặt hàng bạn muốn ký gửi. Sau khi gửi thành công, bạn sẽ nhận mã phiếu để lưu lại. Mặt hàng chỉ có thể được đăng bán sau khi quản trị viên duyệt.</p></div>
+    <ConsignmentForm intakeType="consign" minimumItems={minimumConsignmentItems} maxImagesPerItem={maxImagesPerItem} maxImageBytes={maxImageBytes} privacyPolicyReviewed={privacyPolicyReviewed} categories={categories} />
+  </section>;
+}

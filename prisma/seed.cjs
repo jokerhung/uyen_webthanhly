@@ -10,6 +10,13 @@ async function main() {
   }
 
   await prisma.$transaction(async (tx) => {
+    for (const category of [
+      { slug: 'ao', name: 'Áo', sortOrder: 10 },
+      { slug: 'ao-khoac', name: 'Áo khoác', sortOrder: 40 },
+      { slug: 'phu-kien', name: 'Phụ kiện', sortOrder: 70 },
+    ]) {
+      await tx.itemCategory.upsert({ where: { slug: category.slug }, update: {}, create: category });
+    }
     const consignor = await tx.consignor.upsert({
       where: { id: '00000000-0000-4000-8000-000000000001' },
       update: {},
@@ -25,6 +32,7 @@ async function main() {
       update: {},
       create: {
         publicCode: 'DEMO-ONLY-NOT-A-REAL-RECEIPT',
+        intakeType: 'CONSIGN',
         consignorId: consignor.id,
         note: 'Dữ liệu mô phỏng phục vụ phát triển; không phải phiếu thực.',
       },
@@ -37,7 +45,7 @@ async function main() {
         consignmentId: consignment.id,
         slug: 'demo-ao-khoac-gia',
         name: 'Áo khoác mẫu (giả)',
-        category: 'Áo khoác',
+        category: 'ao-khoac',
         description: 'Sản phẩm mô phỏng để thử luồng chờ duyệt.',
         condition: 'Mô phỏng',
         desiredPrice: 150000,
@@ -53,7 +61,7 @@ async function main() {
         consignmentId: consignment.id,
         slug: 'demo-tui-vai-gia',
         name: 'Túi vải mẫu (giả)',
-        category: 'Phụ kiện',
+        category: 'phu-kien',
         description: 'Sản phẩm mô phỏng; không có ảnh hay liên hệ khách hàng thật.',
         condition: 'Mô phỏng',
         desiredPrice: 70000,
