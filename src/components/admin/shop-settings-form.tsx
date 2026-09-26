@@ -4,12 +4,12 @@ import { useState, type FormEvent } from "react";
 import type { ShopSettings } from "@/lib/shop/settings";
 import { normalizeVietnamesePhone } from "@/lib/validation/settlement";
 
-type Field = "shopName" | "primaryColor" | "backgroundColor" | "surfaceColor" | "address" | "facebookUrl" | "phone" | "opensAt" | "closesAt";
+type Field = "shopName" | "slogan" | "primaryColor" | "backgroundColor" | "surfaceColor" | "address" | "facebookUrl" | "phone" | "opensAt" | "closesAt";
 type Values = Pick<ShopSettings, Field>;
 type ErrorMap = Partial<Record<Field, string>>;
 type SettingsSnapshot = Values & Pick<ShopSettings, "version">;
 
-const fields: Field[] = ["shopName", "primaryColor", "backgroundColor", "surfaceColor", "address", "facebookUrl", "phone", "opensAt", "closesAt"];
+const fields: Field[] = ["shopName", "slogan", "primaryColor", "backgroundColor", "surfaceColor", "address", "facebookUrl", "phone", "opensAt", "closesAt"];
 const colors = [
   { field: "primaryColor", label: "Màu thương hiệu" },
   { field: "backgroundColor", label: "Màu nền" },
@@ -46,6 +46,7 @@ function textOn(color: string): string {
 function validate(values: Values): ErrorMap {
   const errors: ErrorMap = {};
   if (!values.shopName.trim() || values.shopName.trim().length > 120) errors.shopName = "Tên shop cần từ 1 đến 120 ký tự.";
+  if (!values.slogan.trim() || values.slogan.trim().length > 200) errors.slogan = "Slogan cần từ 1 đến 200 ký tự.";
   if (!values.address.trim() || values.address.trim().length > 500) errors.address = "Địa chỉ cần từ 1 đến 500 ký tự.";
   for (const { field } of colors) if (!hexPattern.test(values[field])) errors[field] = "Nhập màu theo dạng #RRGGBB.";
   try {
@@ -145,6 +146,10 @@ export function ShopSettingsForm({ initialSettings }: { initialSettings: ShopSet
         {fieldError(errors.phone, "phone")}
       </label>
     </div>
+    <label htmlFor="slogan" className="grid gap-1 text-sm font-medium">Slogan *
+      <input id="slogan" name="slogan" required maxLength={200} disabled={busy} value={values.slogan} onChange={event => setField("slogan", event.target.value)} aria-invalid={!!errors.slogan} aria-describedby={errors.slogan ? "slogan-error" : undefined} className={control} />
+      {fieldError(errors.slogan, "slogan")}
+    </label>
     <label htmlFor="address" className="grid gap-1 text-sm font-medium">Địa chỉ *
       <textarea id="address" name="address" rows={2} maxLength={500} required disabled={busy} value={values.address} onChange={event => setField("address", event.target.value)} aria-invalid={!!errors.address} aria-describedby={errors.address ? "address-error" : undefined} className={control} />
       {fieldError(errors.address, "address")}
@@ -180,7 +185,7 @@ export function ShopSettingsForm({ initialSettings }: { initialSettings: ShopSet
         <p className="mb-2 text-sm font-semibold">Xem trước màu sắc</p>
         {validColors ? <div className="rounded p-4" style={{ backgroundColor: values.surfaceColor, color: textOn(values.surfaceColor) }}>
           <p className="mb-2 font-semibold">{values.shopName || "Tên shop"}</p>
-          <p className="mb-3 text-sm">Nội dung mẫu trên bề mặt cửa hàng.</p>
+          <p className="mb-3 text-sm">{values.slogan || "Slogan của shop"}</p>
           <span className="inline-block rounded px-4 py-2 text-sm font-semibold" style={{ backgroundColor: values.primaryColor, color: textOn(values.primaryColor) }}>Nút mẫu</span>
           <p className="mt-3 text-xs">Tương phản chữ/nền: {contrast(values.backgroundColor, textOn(values.backgroundColor)).toFixed(1)}:1 · chữ/bề mặt: {contrast(values.surfaceColor, textOn(values.surfaceColor)).toFixed(1)}:1 · chữ/nút: {contrast(values.primaryColor, textOn(values.primaryColor)).toFixed(1)}:1.</p>
           {contrast(values.primaryColor, values.surfaceColor) < 3 && <p className="mt-2 text-xs font-semibold">Lưu ý: màu nút và màu bề mặt tương phản thấp ({contrast(values.primaryColor, values.surfaceColor).toFixed(1)}:1). Hãy cân nhắc chọn màu dễ phân biệt hơn.</p>}

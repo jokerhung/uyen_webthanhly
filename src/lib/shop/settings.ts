@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/client";
 import type { ShopSettingsInput } from "./validation";
 
 export type ShopSettings = {
-  id: number; shopName: string; primaryColor: string; backgroundColor: string; surfaceColor: string;
+  id: number; shopName: string; slogan: string; primaryColor: string; backgroundColor: string; surfaceColor: string;
   address: string; facebookUrl: string; phone: string; opensAt: string; closesAt: string;
   version: number; updatedAt: Date; updatedById: string | null;
 };
@@ -16,7 +16,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
   return settings;
 }
 
-const auditSnapshot = (settings: ShopSettings) => ({ shopName: settings.shopName, primaryColor: settings.primaryColor,
+const auditSnapshot = (settings: ShopSettings) => ({ shopName: settings.shopName, slogan: settings.slogan, primaryColor: settings.primaryColor,
   backgroundColor: settings.backgroundColor, surfaceColor: settings.surfaceColor, address: settings.address,
   facebookUrl: settings.facebookUrl, phone: settings.phone, opensAt: settings.opensAt, closesAt: settings.closesAt,
   version: settings.version });

@@ -178,6 +178,7 @@ model AdminUser {
 model ShopSettings {
   id              Int       @id @default(1)
   shopName        String    @map("shop_name") @db.VarChar(120)
+  slogan          String    @db.VarChar(200)
   primaryColor    String    @map("primary_color") @db.VarChar(7)
   backgroundColor String    @map("background_color") @db.VarChar(7)
   surfaceColor    String    @map("surface_color") @db.VarChar(7)

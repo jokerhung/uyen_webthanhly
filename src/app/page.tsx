@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AnnouncementTicker, SiteFooter } from "@/components/shared/site-chrome";
 import styles from "@/components/shared/home.module.css";
 import CatalogPage from "@/components/catalog/catalog-page";
-import { getPublicShop, shopTagline } from "@/lib/shop/public";
+import { getPublicShop } from "@/lib/shop/public";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export default async function Home() {
     <main className={styles.content}>
       <div className={styles.menu}>
         <h1 className={styles.title}>{shop.shopName}</h1>
-        <p className={styles.brandSubtitle}>Thanh lý ký gửi · {shopTagline}</p>
+        <p className={styles.brandSubtitle}>{shop.slogan}</p>
         <nav aria-label="Điều hướng chính">
           <ul className={styles.nav}>
             {routes.map(([label, href]) => <li key={href}><Link href={href}>{label}</Link></li>)}

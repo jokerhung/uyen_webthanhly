@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { brand } from "@/content/brand";
-import { getPublicShop, shopDescription, shopOpeningHours, shopTagline } from "@/lib/shop/public";
+import { getPublicShop, shopDescription, shopOpeningHours } from "@/lib/shop/public";
 import { CopyHotline } from "@/components/shared/copy-hotline";
 import styles from "@/components/shared/about.module.css";
 
@@ -13,7 +13,7 @@ export default async function AboutPage() {
     <div className={styles.container}>
       <div className={styles.grid}>
         <div><h1 className={styles.heading}>Chào bạn, chúng mình là {shop.shopName}</h1><div className={styles.body}><p>{shopDescription(shop)}</p></div></div>
-        <aside className={styles.brandPanel}><p>{shop.shopName}</p><em>Club</em><span>{shopTagline}</span><a href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Gặp {shop.shopName} trên Facebook ↗</a></aside>
+        <aside className={styles.brandPanel}><p>{shop.shopName}</p><em>Club</em><span>{shop.slogan}</span><a href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Gặp {shop.shopName} trên Facebook ↗</a></aside>
       </div>
       <div className={styles.branches}>
         <h2 className={styles.tag}>Ghé {shop.shopName} tại Hà Nội</h2>

@@ -30,4 +30,6 @@ Thêm tab Cấu hình và trang `/admin/settings/shop`, gồm tên shop, màu th
 
 Migration `20260930000000_shop_settings` đã chạy trên DB local và DB disposable sạch; rollback không dùng `prisma db push`: backup PostgreSQL bao gồm `shop_settings` + `admin_config_events` trước khi deploy; nếu cần rollback code, giữ hai bảng và dữ liệu để deploy lại, chỉ drop chúng sau khi đã xác minh không còn client sử dụng và đã khôi phục backup (drop làm mất lịch sử audit). Kiểm thử local trên DB disposable xác minh lỗi 401/403/422, ghi version/audit và public UI sau request mới; chưa nghiệm thu staging, so pixel và thiết bị thật. Bảng đã seed Besties mặc định không bị ghi đè khi migrate lại. Chỉ chấp nhận màu có độ tương phản phù hợp sau khi người vận hành xem preview; nhiều stylesheet cũ dùng màu trung tính/báo lỗi độc lập chủ đề.
 
+Bổ sung slogan: migration `20261002000000_shop_slogan` thêm cột `slogan` 1–200 ký tự, giữ nguyên dữ liệu đã sửa và điền slogan Besties hiện có cho bản ghi cũ. Trường slogan được kiểm tra ở server, lưu/audit cùng version, có trong form và xuất hiện trên trang chủ, giới thiệu, footer sau request mới.
+
 Chữ chạy tùy chỉnh được hoàn thiện trong Phase 2; nội dung dài không thuộc phạm vi Phase 1, nhưng tên/địa chỉ được chèn trong câu phải dùng cấu hình mới.

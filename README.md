@@ -30,7 +30,7 @@ SĐT shop trong trang `/admin/settings/shop` phải được xác nhận trướ
 
 ## Cấu hình thông tin shop
 
-Đăng nhập quản trị và mở `/admin/settings/shop` để sửa tên, 3 màu, địa chỉ, Facebook, số điện thoại và giờ hoạt động. Migration `20260930000000_shop_settings` tạo bản ghi Besties Club **một lần** nếu bảng còn trống; deploy lại không ghi đè thay đổi. Các trường hiển thị trên public được đọc từ DB ở request mới; `SHOP_PHONE` không còn ghi đè giá trị đã lưu. Form báo lỗi theo trường, xung đột version 409 và có bản ghi `admin_config_events`. Năm mục Cấu hình khác hiện chỉ là nhãn “Sắp triển khai” theo kế hoạch. Chi tiết rollback và cổng QA ở [docs/admin-settings/01-shop-profile.md](docs/admin-settings/01-shop-profile.md).
+Đăng nhập quản trị và mở `/admin/settings/shop` để sửa tên, slogan, 3 màu, địa chỉ, Facebook, số điện thoại và giờ hoạt động. Migration `20260930000000_shop_settings` tạo bản ghi Besties Club **một lần** nếu bảng còn trống; deploy lại không ghi đè thay đổi. Các trường hiển thị trên public được đọc từ DB ở request mới; `SHOP_PHONE` không còn ghi đè giá trị đã lưu. Form báo lỗi theo trường, xung đột version 409 và có bản ghi `admin_config_events`. Năm mục Cấu hình khác hiện chỉ là nhãn “Sắp triển khai” theo kế hoạch. Chi tiết rollback và cổng QA ở [docs/admin-settings/01-shop-profile.md](docs/admin-settings/01-shop-profile.md).
 
 ## Kiểm thử
 

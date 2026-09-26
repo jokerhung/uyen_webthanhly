@@ -13,6 +13,7 @@ const facebook = z.string().trim().url("Đường dẫn Facebook không hợp l�
 export const shopSettingsInputSchema = z.object({
   expectedVersion: z.number().int().positive(),
   shopName: z.string().trim().min(1, "Vui lòng nhập tên shop.").max(120),
+  slogan: z.string().trim().min(1, "Vui lòng nhập slogan.").max(200, "Slogan tối đa 200 ký tự."),
   primaryColor: color,
   backgroundColor: color,
   surfaceColor: color,
