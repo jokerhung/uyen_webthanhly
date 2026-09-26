@@ -12,7 +12,7 @@ type FieldErrors = Partial<Record<keyof Values, string>>;
 const sections = [
   { slug: "shop", label: "Thông tin shop", enabled: true },
   { slug: "announcement", label: "Chữ chạy", enabled: true },
-  { slug: "categories", label: "Loại sản phẩm", enabled: false },
+  { slug: "categories", label: "Loại sản phẩm", enabled: true },
   { slug: "brands", label: "Nhãn hiệu", enabled: false },
   { slug: "sizes", label: "Kích thước", enabled: false },
   { slug: "materials", label: "Chất liệu", enabled: false },

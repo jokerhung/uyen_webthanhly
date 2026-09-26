@@ -20,7 +20,7 @@ test.describe("public catalog in disposable database", () => {
     const salt = randomBytes(16);
     const hash = scryptSync(password, salt, 64, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
     const origin = `http://localhost:${new URL(baseURL!).port}`;
-    await prisma.itemCategory.upsert({ where: { slug: "ao" }, update: {}, create: { slug: "ao", name: `Catalog category ${suffix}` } });
+    await prisma.itemCategory.upsert({ where: { slug: "ao" }, update: {}, create: { slug: "ao", name: `Catalog category ${suffix}`, normalizedName: `catalog category ${suffix}` } });
     await prisma.adminUser.create({ data: {
       email: adminEmail, active: true,
       passwordHash: `scrypt$16384$8$1$${salt.toString("base64url")}$${hash.toString("base64url")}`,

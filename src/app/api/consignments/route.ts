@@ -63,6 +63,10 @@ export async function POST(request: Request): Promise<Response> {
 
     const publicCode = `HUN-${randomBytes(16).toString("hex").toUpperCase()}`;
     const result = await prisma.$transaction(async tx => {
+      // Re-check in the write transaction so a category disabled while images upload cannot slip through.
+      const categorySlugs = [...new Set(parsed.items.map(item => item.category))];
+      const activeCount = await tx.itemCategory.count({ where: { slug: { in: categorySlugs }, active: true } });
+      if (activeCount !== categorySlugs.length) throw new IntakeValidationError("Loại mặt hàng không hợp lệ hoặc đã ngừng nhận.");
       const receipt = await tx.consignment.create({ data: {
         publicCode,
         intakeType: parsed.intakeType === "buy" ? IntakeType.BUY : IntakeType.CONSIGN,

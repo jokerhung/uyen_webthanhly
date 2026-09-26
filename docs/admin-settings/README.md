@@ -1,6 +1,6 @@
 # Kế hoạch tab Cấu hình quản trị
 
-Ngày lập: 26/09/2026. Trạng thái: Phase 1 thông tin shop và Phase 2 chữ chạy đã triển khai local, Phase 3–6 chưa triển khai; chưa nghiệm thu staging. Kế hoạch gồm đúng **6 phase** tương ứng sáu yêu cầu; độc lập với năm phase xây website trước đây.
+Ngày lập: 26/09/2026. Trạng thái: Phase 1–3 đã triển khai local; Phase 4–6 chưa triển khai; chưa nghiệm thu staging. Kế hoạch gồm đúng **6 phase** tương ứng sáu yêu cầu; độc lập với năm phase xây website trước đây.
 
 ## Mục tiêu
 

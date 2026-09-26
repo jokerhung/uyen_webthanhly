@@ -98,6 +98,7 @@ model ListingOption {
 model ItemCategory {
   slug      String  @id @db.VarChar(100)
   name      String  @unique @db.VarChar(100)
+  normalizedName String @unique @map("normalized_name") @db.VarChar(100)
   sortOrder Int     @default(0) @map("sort_order")
   active    Boolean @default(true)
   items     Item[]

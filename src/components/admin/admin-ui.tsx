@@ -9,8 +9,8 @@ export function AdminNav() {
   return <AdminSidebar />;
 }
 
-export function AdminPage({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
-  return <div className="admin-shell"><AdminNav /><div className="admin-shell__content"><main className={className ?? "container-site py-10"}><h1 className="mb-7 text-2xl font-bold">{title}</h1>{children}</main></div></div>;
+export function AdminPage({ title, children, className, hideTitle = false }: { title: string; children: React.ReactNode; className?: string; hideTitle?: boolean }) {
+  return <div className="admin-shell"><AdminNav /><div className="admin-shell__content"><main className={className ?? "container-site py-10"}><h1 className={hideTitle ? "sr-only" : "mb-7 text-2xl font-bold"}>{title}</h1>{children}</main></div></div>;
 }
 
 export function StatusBadge({ status }: { status: ItemStatus }) {
