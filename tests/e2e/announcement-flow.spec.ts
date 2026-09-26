@@ -1,0 +1,75 @@
+import { expect, test } from "@playwright/test";
+import { randomBytes, randomUUID, scryptSync } from "node:crypto";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+test.afterAll(async () => { await prisma.$disconnect(); });
+
+test.describe("announcement settings on disposable database", () => {
+  test.skip(process.env.RUN_ANNOUNCEMENT_DB_E2E !== "1", "Requires an isolated disposable migrated DB");
+  test("auth, validation, conflict, audit, ticker, escaping and hidden offsets", async ({ page, baseURL }) => {
+    const origin = `http://localhost:${new URL(baseURL!).port}`;
+    const api = `${origin}/api/admin/settings/announcement`;
+    const anonymous = await page.request.get(api);
+    expect(anonymous.status()).toBe(401);
+    await page.goto(`${origin}/admin/settings/announcement`);
+    await expect(page).toHaveURL(/\/admin\/login$/);
+    const suffix = randomUUID();
+    const email = `announce-${suffix}@example.test`;
+    const password = `Fixture-${randomUUID()}`;
+    const salt = randomBytes(16);
+    const digest = scryptSync(password, salt, 64, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+    const admin = await prisma.adminUser.create({ data: { email, active: true, passwordHash: `scrypt$16384$8$1$${salt.toString("base64url")}$${digest.toString("base64url")}` } });
+    const headers = { Origin: origin, "Content-Type": "application/json" };
+    expect((await page.request.post(`${origin}/api/admin/session`, { headers, data: { email, password } })).status()).toBe(200);
+    await page.goto(`${origin}/admin/settings/shop`);
+    await page.getByRole("navigation", { name: "Quản trị" }).getByRole("link", { name: "Chữ chạy" }).click();
+    await expect(page).toHaveURL(/\/admin\/settings\/announcement$/);
+    await expect(page.getByRole("textbox", { name: "Nội dung chữ chạy" })).toBeVisible();
+    const initial = (await (await page.request.get(api)).json()).settings;
+    expect(initial.announcementEnabled).toBe(true);
+    expect(initial.announcementText).toContain(initial.shopName);
+    const preview = page.getByRole("region", { name: "Xem trước chữ chạy" });
+    const previewColors = await preview.evaluate(element => ({ background: getComputedStyle(element).backgroundColor, text: getComputedStyle(element).color }));
+    const expectedColors = await page.locator("html").evaluate(element => ({ background: getComputedStyle(element).getPropertyValue("--brand-primary").trim(), text: getComputedStyle(element).getPropertyValue("--on-brand").trim() }));
+    expect(previewColors.background).toBe(await page.evaluate(hex => { const element = document.createElement("div"); element.style.backgroundColor = hex; document.body.append(element); const color = getComputedStyle(element).backgroundColor; element.remove(); return color; }, expectedColors.background));
+    expect(previewColors.text).toBe(await page.evaluate(hex => { const element = document.createElement("div"); element.style.color = hex; document.body.append(element); const color = getComputedStyle(element).color; element.remove(); return color; }, expectedColors.text));
+    const text = `Xin chào ${suffix.slice(0, 8)} <script>alert(1)</script>`;
+    const payload = { expectedVersion: initial.version, announcementText: text, announcementEnabled: true };
+    for (const bad of [{ announcementText: "   " }, { announcementText: "x".repeat(501) }, { shopName: "Hacked" }]) {
+      expect((await page.request.patch(api, { headers, data: { ...payload, ...bad } })).status()).toBe(422);
+    }
+    expect((await page.request.patch(api, { headers: { Origin: "https://evil.invalid" }, data: payload })).status()).toBe(403);
+    expect((await page.request.patch(api, { headers, data: payload })).status()).toBe(200);
+    expect((await page.request.patch(api, { headers, data: payload })).status()).toBe(409);
+    let record = await prisma.shopSettings.findUniqueOrThrow({ where: { id: 1 } });
+    expect(record.announcementText).toBe(text);
+    expect(record.version).toBe(initial.version + 1);
+    expect(record.updatedById).toBe(admin.id);
+    const audit = await prisma.adminConfigEvent.findFirstOrThrow({ where: { adminId: admin.id, entityType: "shop_announcement" } });
+    expect(audit.after).toMatchObject({ announcementText: text, announcementEnabled: true });
+    await page.goto(`${origin}/`);
+    await expect(page.getByRole("region", { name: "Thông báo cửa hàng" })).toContainText(text);
+    expect(await page.locator("script").filter({ hasText: "alert(1)" }).count()).toBe(0);
+    expect(await page.getByRole("region", { name: "Thông báo cửa hàng" }).locator('[aria-hidden="true"]').count()).toBe(1);
+    await page.goto(`${origin}/about`);
+    await expect(page.getByRole("region", { name: "Thông báo cửa hàng" })).toContainText(text);
+    const disable = await page.request.patch(api, { headers, data: { expectedVersion: record.version, announcementText: "", announcementEnabled: false } });
+    expect(disable.status(), await disable.text()).toBe(200);
+    record = await prisma.shopSettings.findUniqueOrThrow({ where: { id: 1 } });
+    expect(record.announcementText).toBe("");
+    await page.goto(`${origin}/`);
+    await expect(page.getByRole("region", { name: "Thông báo cửa hàng" })).toHaveCount(0);
+    expect(await page.locator("main").first().evaluate(element => getComputedStyle(element).paddingTop)).toBe("0px");
+    await page.goto(`${origin}/about`);
+    await expect(page.getByRole("region", { name: "Thông báo cửa hàng" })).toHaveCount(0);
+    expect(await page.locator("main").first().evaluate(element => getComputedStyle(element).paddingTop)).toBe("0px");
+    expect(await page.getByRole("link", { name: "← Trang chủ" }).evaluate(element => getComputedStyle(element).top)).toBe("10px");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    expect(await page.getByRole("link", { name: "← Trang chủ" }).evaluate(element => getComputedStyle(element).top)).toBe("10px");
+    expect(await page.locator("main").first().evaluate(element => getComputedStyle(element).paddingTop)).toBe("0px");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    expect((await page.request.patch(api, { headers, data: { expectedVersion: record.version, announcementText: " ", announcementEnabled: true } })).status()).toBe(422);
+  });
+});

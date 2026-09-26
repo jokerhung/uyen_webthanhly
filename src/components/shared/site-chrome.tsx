@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { getPublicShop, shopAnnouncement, shopOpeningHours } from "@/lib/shop/public";
+import { getPublicShop, shopOpeningHours } from "@/lib/shop/public";
 import styles from "./site-chrome.module.css";
 
 export async function AnnouncementTicker() {
-  const announcement = shopAnnouncement(await getPublicShop());
-  return <div className={styles.ticker} aria-label={announcement}>
+  const shop = await getPublicShop();
+  if (!shop.announcementEnabled) return null;
+  const announcement = shop.announcementText;
+  return <div className={styles.ticker} role="region" aria-label="Thông báo cửa hàng">
+    <span className={styles.screenReaderText}>{announcement}</span>
     <div className={styles.track} aria-hidden="true">
-      {[0, 1].map((index) => <div className={styles.item} key={index}><span className={styles.separator}>✦</span><span>{announcement}</span></div>)}
+      {[0, 1].map(index => <div className={styles.item} key={index}><span className={styles.separator}>✦</span><span>{announcement}</span></div>)}
     </div>
   </div>;
 }

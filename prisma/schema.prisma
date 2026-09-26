@@ -179,6 +179,8 @@ model ShopSettings {
   id              Int       @id @default(1)
   shopName        String    @map("shop_name") @db.VarChar(120)
   slogan          String    @db.VarChar(200)
+  announcementText String   @map("announcement_text") @db.VarChar(500)
+  announcementEnabled Boolean @default(true) @map("announcement_enabled")
   primaryColor    String    @map("primary_color") @db.VarChar(7)
   backgroundColor String    @map("background_color") @db.VarChar(7)
   surfaceColor    String    @map("surface_color") @db.VarChar(7)

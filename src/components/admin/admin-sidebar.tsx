@@ -8,7 +8,7 @@ import "./admin-sidebar.css";
 
 const settings = [
   { label: "Thông tin shop", href: "/admin/settings/shop", available: true },
-  { label: "Chữ chạy", href: "/admin/settings/announcement", available: false },
+  { label: "Chữ chạy", href: "/admin/settings/announcement", available: true },
   { label: "Loại sản phẩm", href: "/admin/settings/categories", available: false },
   { label: "Nhãn hiệu", href: "/admin/settings/brands", available: false },
   { label: "Kích thước", href: "/admin/settings/sizes", available: false },

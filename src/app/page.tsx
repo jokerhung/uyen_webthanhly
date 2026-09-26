@@ -17,7 +17,7 @@ export default async function Home() {
   const shop = await getPublicShop();
   return <div className={styles.page}>
     <AnnouncementTicker />
-    <main className={styles.content}>
+    <main className={`${styles.content} ${shop.announcementEnabled ? "" : styles.withoutTicker}`}>
       <div className={styles.menu}>
         <h1 className={styles.title}>{shop.shopName}</h1>
         <p className={styles.brandSubtitle}>{shop.slogan}</p>

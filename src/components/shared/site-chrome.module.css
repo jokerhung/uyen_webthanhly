@@ -2,19 +2,22 @@
 .track { display: flex; width: max-content; animation: marquee 25s linear infinite; }
 .item { display: flex; align-items: center; flex-shrink: 0; }
 .item span { display: block; padding-right: 54px; font-size: 18px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
-.item .separator { color: rgb(255 255 255 / 50%); }
+.item .separator { color: inherit; opacity: .6; }
+.screenReaderText { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 .back { position: fixed; z-index: 110; top: 99px; left: 3%; padding: 9px 0; color: #000; font-size: 13.5px; font-weight: 600; letter-spacing: 1.35px; line-height: 22.275px; text-decoration: none; text-transform: uppercase; transition: transform .28s ease; }
 .back:hover { transform: translateX(-3px); }
+.backWithoutTicker { top: 10px; }
 .footer { background: #111; color: #fff; text-align: center; padding: 14.4px 5% 18px; border-top: 1px solid rgb(255 255 255 / 20%); line-height: 1.65; }
 .brand { font-size: 25.2px; font-weight: 500; letter-spacing: .1em; margin: 0 0 3.6px; }
 .tagline { font-size: 18px; font-style: italic; color: rgb(255 255 255 / 65%); margin: 0 0 10.8px; }
 .divider { width: 45px; height: 1px; margin: 0 auto 16.2px; background: rgb(255 255 255 / 15%); }
 .hours { font-size: 14.4px; letter-spacing: .07em; color: rgb(255 255 255 / 50%); margin: 0 0 9px; }
 .copy { font-size: 14.04px; letter-spacing: .05em; color: rgb(255 255 255 / 35%); margin: 0; }
-@media (max-width: 768px) { .ticker { padding: 12.6px 0; } .item span { font-size: 13.5px; padding-right: 36px; } .back { top: 86.4px; left: 18px; } }
+@media (max-width: 768px) { .ticker { padding: 12.6px 0; } .item span { font-size: 13.5px; padding-right: 36px; } .back { top: 86.4px; left: 18px; } .backWithoutTicker { top: 10px; } }
 @media (prefers-reduced-motion: reduce) { .track { animation: none; } .back { transition: none; } }
 .ticker { background: var(--brand-primary); color: var(--on-brand); border-color: var(--border); }
+.ticker .item span:not(.separator) { max-width: none; white-space: nowrap; }
 .back { color: var(--foreground); }
 .footer { background: var(--brand-primary); color: var(--on-brand); border-color: var(--border); padding-block: 28px; }
 .brand { font-family: Georgia, 'Times New Roman', serif; font-size: 34px; letter-spacing: -.03em; }

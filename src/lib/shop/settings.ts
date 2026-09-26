@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/client";
 import type { ShopSettingsInput } from "./validation";
 
 export type ShopSettings = {
-  id: number; shopName: string; slogan: string; primaryColor: string; backgroundColor: string; surfaceColor: string;
+  id: number; shopName: string; slogan: string; announcementText: string; announcementEnabled: boolean; primaryColor: string; backgroundColor: string; surfaceColor: string;
   address: string; facebookUrl: string; phone: string; opensAt: string; closesAt: string;
   version: number; updatedAt: Date; updatedById: string | null;
 };

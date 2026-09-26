@@ -1,6 +1,8 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); color: var(--foreground); line-height: 1.65; }
 .content { min-height: 100vh; padding-top: 90px; display: flex; flex-direction: column; }
+.withoutTicker { padding-top: 0; }
 .menu { min-height: calc(100svh - 90px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px; }
+.withoutTicker .menu { min-height: 100svh; }
 .scrollHint { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 60px; color: rgb(255 255 255 / 60%); font-size: 12px; letter-spacing: .04em; text-decoration: none; }
 .scrollHint:hover { color: #fff; }
 .scrollHint span { font-size: 18px; }
