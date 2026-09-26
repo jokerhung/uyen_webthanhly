@@ -1,20 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ItemStatus } from "@prisma/client";
-import { LogoutButton } from "./logout-button";
+import { AdminSidebar } from "./admin-sidebar";
 import { itemStatusLabels } from "@/lib/admin/item-status";
 
 
 export function AdminNav() {
-  return <nav aria-label="Quản trị" className="mb-8 flex flex-wrap gap-3 border-b border-neutral-200 pb-4 text-sm font-semibold">
-    <Link className="rounded border px-4 py-2 hover:bg-neutral-100" href="/admin/items">Mặt hàng</Link>
-    <Link className="rounded border px-4 py-2 hover:bg-neutral-100" href="/admin/consignments">Phiếu tiếp nhận</Link>
-    <LogoutButton />
-  </nav>;
+  return <AdminSidebar />;
 }
 
 export function AdminPage({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
-  return <main className={className ?? "container-site py-10"}><AdminNav /><h1 className="mb-7 text-2xl font-bold">{title}</h1>{children}</main>;
+  return <div className="admin-shell"><AdminNav /><div className="admin-shell__content"><main className={className ?? "container-site py-10"}><h1 className="mb-7 text-2xl font-bold">{title}</h1>{children}</main></div></div>;
 }
 
 export function StatusBadge({ status }: { status: ItemStatus }) {

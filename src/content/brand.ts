@@ -1,4 +1,4 @@
-/** Public contact details verified on the Besties Club Facebook page. */
+/** Historical reference values for fixtures only; runtime shop identity/contact comes from shop_settings. */
 export const brand = {
   name: "Besties Club",
   fullName: "Besties Club - Thanh lý ký gửi",

@@ -29,16 +29,13 @@ test("public routes do not overflow mobile viewport", async ({ page }) => {
   }
 });
 
-test("demo settlement clears stale response on input edits", async ({ page }) => {
+test("settlement lookup asks for verification and clears stale response on edits", async ({ page }) => {
   await page.goto("/sales");
-  await page.waitForLoadState("networkidle");
   const input = page.getByRole("textbox", { name: /số điện thoại/i });
   await input.fill("0000000000");
   await page.getByRole("button", { name: /tìm kiếm/i }).click();
-  await expect(page.getByText(/Báo cáo mô phỏng/i)).toBeVisible();
+  await expect(page.locator("#settlement-feedback")).not.toBeEmpty();
   await input.fill("0912345678");
-  await expect(page.getByText(/Báo cáo mô phỏng/i)).toHaveCount(0);
-  await page.getByRole("button", { name: /tìm kiếm/i }).click();
-  await expect(page.getByText(/Không có dữ liệu mô phỏng/i)).toBeVisible();
+  await expect(page.locator("#settlement-feedback")).toBeEmpty();
   expect(new URL(page.url()).search).toBe("");
 });

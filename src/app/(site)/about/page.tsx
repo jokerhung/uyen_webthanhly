@@ -1,41 +1,30 @@
 import type { Metadata } from "next";
-import { aboutParagraphs } from "@/content/about";
-import { branchGroups, openingHours } from "@/content/branches";
-import { getSiteConfig } from "@/content/site";
+import { brand } from "@/content/brand";
+import { getPublicShop, shopDescription, shopOpeningHours, shopTagline } from "@/lib/shop/public";
 import { CopyHotline } from "@/components/shared/copy-hotline";
 import styles from "@/components/shared/about.module.css";
-import { brand } from "@/content/brand";
 
-export const metadata: Metadata = { title: "Giới thiệu Besties Club" };
+export const dynamic = "force-dynamic";
+export async function generateMetadata(): Promise<Metadata> { const shop = await getPublicShop(); return { title: `Giới thiệu ${shop.shopName}` }; }
 
-export default function AboutPage() {
-  const { shopPhone } = getSiteConfig();
-
+export default async function AboutPage() {
+  const shop = await getPublicShop();
   return <section className={styles.section} id="intro">
     <div className={styles.container}>
       <div className={styles.grid}>
-        <div>
-          <h1 className={styles.heading}>Chào bạn, chúng mình là Besties Club</h1>
-          <div className={styles.body}>{aboutParagraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
-        </div>
-        <aside className={styles.brandPanel}><p>BESTIES</p><em>Club</em><span>{brand.tagline}</span><a href={brand.facebook} target="_blank" rel="noreferrer">Gặp Besties trên Facebook ↗</a></aside>
+        <div><h1 className={styles.heading}>Chào bạn, chúng mình là {shop.shopName}</h1><div className={styles.body}><p>{shopDescription(shop)}</p></div></div>
+        <aside className={styles.brandPanel}><p>{shop.shopName}</p><em>Club</em><span>{shopTagline}</span><a href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Gặp {shop.shopName} trên Facebook ↗</a></aside>
       </div>
       <div className={styles.branches}>
-        <h2 className={styles.tag}>Ghé Besties Club tại Hà Nội</h2>
-        <p className={styles.note}>Giờ mở cửa: {openingHours}<br /><a href={`mailto:${brand.email}`}>{brand.email}</a></p>
-        <div className={styles.branchGrid}>
-          {branchGroups.map((group) => <div className={styles.branchGroup} key={group.name}>
-            <h3 className={styles.branchName}>{group.name}</h3>
-            <p className={styles.branchDesc}>{group.description}</p>
-            <div className={styles.branchList}>
-              {group.branches.map((branch) => <div className={styles.branchItem} key={branch.id}>
-                <p className={styles.address}>📍 {branch.address}</p>
-                <CopyHotline phone={shopPhone} />
-                <a className={styles.directions} href={brand.facebook} target="_blank" rel="noreferrer">Liên hệ qua Facebook</a>
-              </div>)}
-            </div>
-          </div>)}
-        </div>
+        <h2 className={styles.tag}>Ghé {shop.shopName} tại Hà Nội</h2>
+        <p className={styles.note}>Giờ mở cửa: {shopOpeningHours(shop)}<br /><a href={`mailto:${brand.email}`}>{brand.email}</a></p>
+        <div className={styles.branchGrid}><div className={styles.branchGroup}>
+          <h3 className={styles.branchName}>{shop.shopName}</h3><p className={styles.branchDesc}>Thanh lý • Ký gửi • Thời trang được yêu thêm lần nữa</p>
+          <div className={styles.branchList}><div className={styles.branchItem}>
+            <p className={styles.address}>📍 {shop.address}</p><CopyHotline phone={shop.phone} />
+            <a className={styles.directions} href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Liên hệ qua Facebook</a>
+          </div></div>
+        </div></div>
       </div>
     </div>
   </section>;

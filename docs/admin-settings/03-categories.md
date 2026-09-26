@@ -1,0 +1,25 @@
+# Phase 3 — Danh sách loại sản phẩm
+
+Phụ thuộc: Phase 1; thực hiện sau Phase 2. Ước lượng: 1–1,5 ngày. [Tổng quan](README.md).
+
+## Phạm vi
+
+Trang `/admin/settings/categories` quản lý bảng `ItemCategory` hiện có: thêm, xóa mềm và khôi phục loại sản phẩm.
+
+## Công việc
+
+- [ ] Dựng component quản lý danh mục tái sử dụng: danh sách, tìm kiếm, trạng thái Đang dùng/Đã xóa, số mặt hàng tham chiếu, form Thêm, dialog xác nhận xóa, nút Khôi phục.
+- [ ] Thêm API `GET/POST /api/admin/settings/categories`; mutation xóa/khôi phục theo ID. Bảo vệ toàn bộ bằng session và kiểm tra cùng nguồn.
+- [ ] Tạo slug ở server; giữ nguyên slug cũ và quan hệ Item. Tên 1–100 ký tự, chống trùng theo quy tắc chuẩn hóa trong tổng quan.
+- [ ] Rà trùng dữ liệu cũ trước khi bổ sung normalizedName/unique constraint. Nếu trùng, báo rõ các bản ghi để xử lý; không tự chuyển Item sang loại khác.
+- [ ] Xóa đặt `active=false`, ghi audit. Hiển thị rõ số mặt hàng đang dùng và nhãn cũ vẫn được giữ; không xóa bản ghi vật lý.
+- [ ] Làm mới form ký gửi/thu mua, form thuộc tính admin và bộ lọc sản phẩm; API tiếp nhận/đăng bán kiểm tra lại active ở lần gửi.
+- [ ] Form có category cũ đã ngừng dùng phải hiện trạng thái đó và yêu cầu lựa chọn hợp lệ khi lưu; không tự thay bằng option đầu tiên.
+
+## Đầu ra và nghiệm thu
+
+- [ ] Thêm loại mới → xuất hiện ở tất cả combobox/bộ lọc liên quan.
+- [ ] Xóa loại đã có mặt hàng → loại biến mất khỏi lựa chọn mới, hàng cũ vẫn đọc và hiển thị được.
+- [ ] Khôi phục giữ đúng slug và liên kết cũ; thêm trùng bản ghi đã xóa hướng dẫn khôi phục.
+- [ ] Hai request thêm cùng tên không tạo hai bản ghi; payload giả danh ID/kind không hợp lệ bị chặn.
+- [ ] Component và service danh mục sẵn sàng dùng cho Phase 4–6.

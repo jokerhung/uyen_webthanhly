@@ -1,15 +1,15 @@
-.page { min-height: 100vh; display: flex; flex-direction: column; background: #f6ecdc; color: #4b2918; line-height: 1.65; }
+.page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); color: var(--foreground); line-height: 1.65; }
 .content { min-height: 100vh; padding-top: 90px; display: flex; flex-direction: column; }
 .menu { min-height: calc(100svh - 90px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px; }
 .scrollHint { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 60px; color: rgb(255 255 255 / 60%); font-size: 12px; letter-spacing: .04em; text-decoration: none; }
 .scrollHint:hover { color: #fff; }
 .scrollHint span { font-size: 18px; }
-.catalogSection { background: #fff; color: #111; scroll-margin-top: 80px; }
+.catalogSection { background: var(--surface); color: var(--on-surface); scroll-margin-top: 80px; }
 .title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(48px, 9vw, 112px); font-weight: 400; letter-spacing: -.06em; line-height: 1.1; margin: 0 0 20px; }
-.brandSubtitle { font-size: 14px; letter-spacing: .22em; text-transform: uppercase; margin-bottom: 56px; color: #80634b; }
-.nav a { color: #5a3826 !important; font-size: clamp(14px, 1.6vw, 20px) !important; }
-.nav a::after { background: #5a3826 !important; }
-.scrollHint, .scrollHint:hover { color: #80634b !important; }
+.brandSubtitle { font-size: 14px; letter-spacing: .22em; text-transform: uppercase; margin-bottom: 56px; color: var(--foreground); }
+.nav a { color: var(--foreground) !important; font-size: clamp(14px, 1.6vw, 20px) !important; }
+.nav a::after { background: var(--foreground) !important; }
+.scrollHint, .scrollHint:hover { color: var(--foreground) !important; }
 .nav { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 45px 90px; width: 100%; padding: 0; margin: 0; }
 .nav a { position: relative; padding: 7.2px 0; color: rgb(255 255 255 / 85%); font-size: 23.4px; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; transition: color .28s ease, letter-spacing .28s ease; }
 .nav a::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 0; height: 1px; background: #fff; transition: width .3s, left .3s; }

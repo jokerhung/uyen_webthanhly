@@ -1,27 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { buyAnnouncement, buyCriteria, buyPrices, buyProcesses } from "../../src/content/buy";
-import { consignBranches, consignCriteria, consignFees, consignProcesses } from "../../src/content/consign";
+import { buyAnnouncement, buyCriteria, buyPrices, getBuyProcesses } from "../../src/content/buy";
+import { consignCriteria, consignFees, getConsignProcesses } from "../../src/content/consign";
+const shop = { shopName: "TEST SHOP", address: "Test Lane", phone: "0986489942" } as Parameters<typeof getBuyProcesses>[0];
 
 describe("public service page content", () => {
-  it("contains the four published consignment fee bands in order", () => {
-    expect(consignFees.map(fee => fee.range)).toEqual(["Dưới 60k", "Từ 60k – 130k", "Trên 130k", "Không bán được"]);
-    expect(consignFees.at(-1)).toMatchObject({ noFee: true, description: "Không mất phí" });
-    expect(consignCriteria).toHaveLength(6);
+  it("does not promise unapproved fees or purchase prices", () => {
+    expect(consignFees).toHaveLength(1);
+    expect(consignFees[0].description).toContain("Liên hệ");
+    expect(consignCriteria.length).toBeGreaterThan(0);
+    expect(buyPrices[0].price).toBe("Liên hệ shop");
+    expect(buyAnnouncement.length).toBeGreaterThan(0);
+    expect(buyCriteria.length).toBeGreaterThan(0);
   });
-  it("contains 4 direct and 5 online consignment steps", () => {
-    expect(consignProcesses.direct.steps).toHaveLength(4);
-    expect(consignProcesses.online.steps).toHaveLength(5);
-    expect(consignProcesses.online.steps[0].link?.href).toBe("https://zalo.me/hunthanhly");
-    expect(consignBranches.flatMap(group => group.branches)).toHaveLength(3);
-  });
-  it("contains the published purchase announcement, three prices, and criteria", () => {
-    expect(buyAnnouncement).toHaveLength(2);
-    expect(buyPrices.map(price => price.price)).toEqual(["80k – 100k / kg", "150k – 200k / kg", "Báo giá theo chiếc"]);
-    expect(buyCriteria.flatMap(group => group.items)).toHaveLength(3);
-  });
-  it("contains 3 direct and 4 online purchase steps and warns against shipping valuables", () => {
-    expect(buyProcesses.direct.steps).toHaveLength(3);
-    expect(buyProcesses.online.steps).toHaveLength(4);
-    expect(buyProcesses.online.steps[0].warning).toContain("KHÔNG NHẬN SHIP");
+  it("uses online request forms rather than old hard-coded contact links", () => {
+    expect(getConsignProcesses(shop).online.steps[0].text).toContain("form");
+    expect(getBuyProcesses(shop).online.steps[0].text).toContain("form");
+    expect(getConsignProcesses(shop).direct.steps[0].text).toContain(shop.phone);
+    expect(getBuyProcesses(shop).direct.steps[1].text).toContain(shop.address);
   });
 });

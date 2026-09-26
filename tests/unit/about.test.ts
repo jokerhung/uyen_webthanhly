@@ -1,35 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { branchGroups, openingHours } from "../../src/content/branches";
-import { aboutParagraphs, timeline } from "../../src/content/about";
+import { brand } from "../../src/content/brand";
 import { getSiteConfig } from "../../src/content/site";
+import { shopSettingsInputSchema } from "../../src/lib/shop/validation";
 
-describe("public about content", () => {
-  it("lists three uniquely identified physical locations in two groups", () => {
-    const locations = branchGroups.flatMap((group) => group.branches);
-    expect(locations).toHaveLength(3);
-    expect(new Set(locations.map((branch) => branch.id)).size).toBe(3);
-    expect(branchGroups).toHaveLength(2);
-    expect(locations.every((branch) => branch.directionsStatus === "unverified")).toBe(true);
+const base = { expectedVersion: 1, shopName: brand.name, primaryColor: "#764D32", backgroundColor: "#FFF9F1", surfaceColor: "#FFFFFF", address: brand.address, facebookUrl: brand.facebook, phone: brand.phone, opensAt: "09:00", closesAt: "22:00" };
+
+describe("shop profile validation", () => {
+  it("normalizes phone, color and accepts next-day hours", () => {
+    const result = shopSettingsInputSchema.parse({ ...base, opensAt: "22:00", closesAt: "03:00" });
+    expect(result.phone).toBe("0986489942");
+    expect(result.primaryColor).toBe("#764D32");
   });
-
-  it("keeps the chronology and hours explicit", () => {
-    expect(timeline.map(({ year }) => year)).toEqual(["2021", "2022", "2024", "2026"]);
-    expect(timeline.filter(({ current }) => current)).toHaveLength(1);
-    expect(aboutParagraphs).toHaveLength(3);
-    expect(openingHours).toBe("10h–20h30");
-  });
-
-  it("uses the configured phone, not the source site's hard-coded branch numbers", () => {
-    const before = process.env.SHOP_PHONE;
-    try {
-      process.env.SHOP_PHONE = " 0123 456 789 ";
-      expect(getSiteConfig().shopPhone).toBe("0123 456 789");
-      delete process.env.SHOP_PHONE;
-      expect(getSiteConfig().shopPhone).toBeNull();
-      expect(JSON.stringify(branchGroups)).not.toMatch(/0397 710 510|0923 002 177|0972 865 615/);
-    } finally {
-      if (before === undefined) delete process.env.SHOP_PHONE;
-      else process.env.SHOP_PHONE = before;
+  it("rejects invalid colors, facebook credentials, equal hours and phone", () => {
+    for (const extra of [{ primaryColor: "red" }, { facebookUrl: "https://evil.example" }, { facebookUrl: "https://u:p@facebook.com/" }, { phone: "0123" }, { closesAt: "09:00" }]) {
+      expect(shopSettingsInputSchema.safeParse({ ...base, ...extra }).success).toBe(false);
     }
+  });
+  it("keeps technical intake flags separate from public shop contact", () => {
+    expect(getSiteConfig()).not.toHaveProperty("shopPhone");
+    expect(getSiteConfig()).not.toHaveProperty("brand");
   });
 });

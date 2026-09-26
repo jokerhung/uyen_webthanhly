@@ -5,12 +5,14 @@ import { prisma } from "@/lib/db/client";
 import { CATALOG_PAGE_SIZE, catalogCardSelect, catalogImageUrl, catalogWhere } from "@/lib/catalog/queries";
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
 import "@/components/catalog/catalog.css";
+import { getPublicShop } from "@/lib/shop/public";
 
 function money(value: { toString(): string } | null) { return value ? `${new Intl.NumberFormat("vi-VN").format(Number(value.toString()))} ₫` : "Liên hệ shop"; }
 const filterFields = { gender: "genderId", season: "seasonId", material: "materialId", size: "sizeId", brand: "brandId" } as const;
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
+  const shop = await getPublicShop();
   const [options, categories] = await Promise.all([
     prisma.listingOption.findMany({ where: { active: true, kind: { in: Object.keys(filterFields) } }, orderBy: [{ sortOrder: "asc" }, { label: "asc" }], select: { id: true, label: true, kind: true } }),
     prisma.itemCategory.findMany({ where: { active: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }], select: { slug: true, name: true } }),
@@ -49,7 +51,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
   return <CatalogFilters groups={groups} selected={selected} total={total}>
     {items.length ? <div className="catalog__grid">{items.map(item => <article className="catalog__card" key={item.id}>
       <Link href={`/items/${encodeURIComponent(item.slug)}`} aria-label={`Xem ${item.name}`} className="catalog__media">{item.images[0] ? <Image unoptimized src={catalogImageUrl(item.slug, item.images[0].id)} alt={item.images[0].altText} width={600} height={900} /> : <span>Chưa có ảnh</span>}</Link>
-      <div className="catalog__card-info"><p className="catalog__brand">{item.brand?.label ?? "Besties Club"}</p><Link href={`/items/${encodeURIComponent(item.slug)}`} className="catalog__name">{item.name}</Link><p className="catalog__price">{money(item.salePrice)}</p><Link className="catalog__quick-link" href={`/items/${encodeURIComponent(item.slug)}`} aria-label={`Chi tiết ${item.name}`}>+</Link></div>
+      <div className="catalog__card-info"><p className="catalog__brand">{item.brand?.label ?? shop.shopName}</p><Link href={`/items/${encodeURIComponent(item.slug)}`} className="catalog__name">{item.name}</Link><p className="catalog__price">{money(item.salePrice)}</p><Link className="catalog__quick-link" href={`/items/${encodeURIComponent(item.slug)}`} aria-label={`Chi tiết ${item.name}`}>+</Link></div>
     </article>)}</div> : <div className="catalog__empty"><p>Không có mặt hàng phù hợp.</p><Link href="/items">Xem tất cả mặt hàng</Link></div>}
     {totalPages > 1 && <nav aria-label="Phân trang hàng đang bán" className="catalog__pagination">{page > 1 ? <Link href={pageUrl(page - 1)}>← Trước</Link> : <span />}<span>Trang {page} / {totalPages}</span>{page < totalPages ? <Link href={pageUrl(page + 1)}>Tiếp →</Link> : <span />}</nav>}
   </CatalogFilters>;

@@ -4,6 +4,6 @@ const routes = ["/", "/about", "/consign", "/buy", "/sales", "/consign/submit", 
 for (const route of routes) {
   test(`skeleton loads ${route}`, async ({ page }) => {
     await page.goto(route);
-    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.locator("h1").first()).toBeVisible();
   });
 }

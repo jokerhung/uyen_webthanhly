@@ -1,0 +1,57 @@
+import { expect, test } from "@playwright/test";
+import { randomBytes, randomUUID, scryptSync } from "node:crypto";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+test.afterAll(async () => { await prisma.$disconnect(); });
+
+test.describe("shop settings in disposable database", () => {
+  test.skip(process.env.RUN_SHOP_SETTINGS_DB_E2E !== "1", "Requires an isolated disposable migrated DB");
+  test("auth, validation, optimistic locking, audit, public values and theme survive requests", async ({ page, baseURL }) => {
+    const origin = `http://localhost:${new URL(baseURL!).port}`;
+    const api = `${origin}/api/admin/settings/shop`;
+    const suffix = randomUUID();
+    const email = `shop-admin-${suffix}@example.test`;
+    const password = `Fake-${randomUUID()}`;
+    const salt = randomBytes(16);
+    const digest = scryptSync(password, salt, 64, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+    const admin = await prisma.adminUser.create({ data: { email, active: true, passwordHash: `scrypt$16384$8$1$${salt.toString("base64url")}$${digest.toString("base64url")}` } });
+    const anonymous = await page.request.get(api);
+    expect(anonymous.status()).toBe(401);
+    await page.goto(`${origin}/admin/settings/shop`);
+    await expect(page).toHaveURL(/\/admin\/login$/);
+    const login = await page.request.post(`${origin}/api/admin/session`, { headers: { Origin: origin }, data: { email, password } });
+    expect(login.status()).toBe(200);
+    await page.goto(`${origin}/admin/settings`);
+    await expect(page).toHaveURL(/\/admin\/settings\/shop$/);
+    const current = await page.request.get(api);
+    expect(current.status()).toBe(200);
+    const { settings } = await current.json();
+    const input = { expectedVersion: settings.version, shopName: `Test Shop ${suffix.slice(0, 8)}`, primaryColor: "#132D47", backgroundColor: "#F4F2EB", surfaceColor: "#D3E9F1", address: "12 Test Lane, Hà Nội", facebookUrl: "https://www.facebook.com/example.test", phone: "+84986489942", opensAt: "22:00", closesAt: "03:00" };
+    const headers = { Origin: origin, "Content-Type": "application/json" };
+    expect((await page.request.patch(api, { headers, data: { ...input, primaryColor: "red" } })).status()).toBe(422);
+    expect((await page.request.patch(api, { headers, data: { ...input, facebookUrl: "https://evil.invalid" } })).status()).toBe(422);
+    expect((await page.request.patch(api, { headers, data: { ...input, phone: "123" } })).status()).toBe(422);
+    expect((await page.request.patch(api, { headers, data: { ...input, closesAt: "22:00" } })).status()).toBe(422);
+    expect((await page.request.patch(api, { headers: { Origin: "https://evil.invalid" }, data: input })).status()).toBe(403);
+    const saved = await page.request.patch(api, { headers, data: input });
+    expect(saved.status(), await saved.text()).toBe(200);
+    const savedData = JSON.parse(await saved.text());
+    expect(savedData.settings.phone).toBe("0986489942");
+    const conflict = await page.request.patch(api, { headers, data: input });
+    expect(conflict.status()).toBe(409);
+    const record = await prisma.shopSettings.findUniqueOrThrow({ where: { id: 1 } });
+    expect(record.version).toBe(settings.version + 1);
+    expect(record.updatedById).toBe(admin.id);
+    expect(await prisma.adminConfigEvent.count({ where: { entityType: "shop_settings", entityId: "1", adminId: admin.id } })).toBe(1);
+    const home = await page.request.get(`${origin}/`);
+    const html = await home.text();
+    expect(html).toContain(input.shopName);
+    expect(html).toContain(input.address);
+    expect(html).toContain("--brand-primary:#132D47");
+    const about = await page.request.get(`${origin}/about`);
+    expect(await about.text()).toContain("03:00 (ngày hôm sau)");
+    const sitemap = await page.request.get(`${origin}/items/does-not-exist`);
+    expect(sitemap.status()).toBe(404);
+  });
+});

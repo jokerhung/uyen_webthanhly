@@ -169,8 +169,45 @@ model AdminUser {
   reviewedItems   Item[]            @relation("ItemReviewer")
   statusEvents    ItemStatusEvent[]
   sessions        AdminSession[]
+  updatedShopSettings ShopSettings[] @relation("ShopSettingsEditor")
+  configEvents    AdminConfigEvent[]
 
   @@map("admin_users")
+}
+
+model ShopSettings {
+  id              Int       @id @default(1)
+  shopName        String    @map("shop_name") @db.VarChar(120)
+  primaryColor    String    @map("primary_color") @db.VarChar(7)
+  backgroundColor String    @map("background_color") @db.VarChar(7)
+  surfaceColor    String    @map("surface_color") @db.VarChar(7)
+  address         String    @db.VarChar(500)
+  facebookUrl     String    @map("facebook_url") @db.VarChar(2048)
+  phone           String    @db.VarChar(15)
+  opensAt         String    @map("opens_at") @db.VarChar(5)
+  closesAt        String    @map("closes_at") @db.VarChar(5)
+  version         Int       @default(1)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedById     String?   @map("updated_by_id") @db.Uuid
+  updatedBy       AdminUser? @relation("ShopSettingsEditor", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@map("shop_settings")
+}
+
+model AdminConfigEvent {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  adminId    String    @map("admin_id") @db.Uuid
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Restrict)
+  action     String    @db.VarChar(50)
+  entityType String    @map("entity_type") @db.VarChar(50)
+  entityId   String    @map("entity_id") @db.VarChar(100)
+  before     Json?
+  after      Json?
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([entityType, entityId, createdAt(sort: Desc)])
+  @@index([adminId])
+  @@map("admin_config_events")
 }
 
 model AdminSession {

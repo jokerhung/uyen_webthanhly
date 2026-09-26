@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { announcement } from "@/content/about";
-import { openingHours } from "@/content/branches";
+import { getPublicShop, shopAnnouncement, shopOpeningHours, shopTagline } from "@/lib/shop/public";
 import styles from "./site-chrome.module.css";
-import { brand } from "@/content/brand";
 
-export function AnnouncementTicker() {
+export async function AnnouncementTicker() {
+  const announcement = shopAnnouncement(await getPublicShop());
   return <div className={styles.ticker} aria-label={announcement}>
     <div className={styles.track} aria-hidden="true">
       {[0, 1].map((index) => <div className={styles.item} key={index}><span className={styles.separator}>✦</span><span>{announcement}</span></div>)}
@@ -16,12 +15,13 @@ export function BackToHome() {
   return <Link href="/" className={styles.back}>← Trang chủ</Link>;
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const shop = await getPublicShop();
   return <footer className={styles.footer}>
-    <div className={styles.brand}>Besties Club</div>
-    <p className={styles.tagline}>{brand.tagline}</p>
+    <div className={styles.brand}>{shop.shopName}</div>
+    <p className={styles.tagline}>{shopTagline}</p>
     <div className={styles.divider} aria-hidden="true" />
-    <p className={styles.hours}><a href={brand.facebook} target="_blank" rel="noreferrer">Facebook Besties Club</a> · Giờ mở cửa: {openingHours}</p>
-    <p className={styles.copy}>© 2026 Besties Club Thanh Lý Ký Gửi · Hà Nội</p>
+    <p className={styles.hours}><a href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Facebook {shop.shopName}</a> · {shop.address} · Giờ mở cửa: {shopOpeningHours(shop)}</p>
+    <p className={styles.copy}>© {new Date().getFullYear()} {shop.shopName} · Hà Nội</p>
   </footer>;
 }

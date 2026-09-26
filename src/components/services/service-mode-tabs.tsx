@@ -2,11 +2,12 @@ import Link from "next/link";
 import type { ServiceProcesses } from "@/types/services";
 import { ProcessSteps } from "./process-steps";
 import { ConsignBranchGroups } from "./consign-branch-groups";
-import { consignBranches, consignNotes } from "@/content/consign";
+import { consignNotes } from "@/content/consign";
+import type { ServiceBranchGroup } from "@/types/services";
 
-type Props = { readonly kind: "consign" | "buy"; readonly heading: string; readonly processes: ServiceProcesses };
+type Props = { readonly kind: "consign" | "buy"; readonly heading: string; readonly processes: ServiceProcesses; readonly branches?: readonly ServiceBranchGroup[] };
 
-export function ServiceModeTabs({ kind, heading, processes }: Props) {
+export function ServiceModeTabs({ kind, heading, processes, branches }: Props) {
   return <section className="methods" aria-label={heading}>
     <h2 className="info-block__label methods__heading">{heading}</h2>
     <div className="methods__tabs" aria-label={heading}>
@@ -18,7 +19,7 @@ export function ServiceModeTabs({ kind, heading, processes }: Props) {
       <ProcessSteps steps={processes.direct.steps} />
       {kind === "consign" && <>
         <p className="online-consign-note"><strong>Lưu ý:</strong><br />{consignNotes.map(note => <span key={note}>— {note}<br /></span>)}</p>
-        <ConsignBranchGroups groups={consignBranches} />
+        {branches && <ConsignBranchGroups groups={branches} />}
       </>}
     </div>
   </section>;

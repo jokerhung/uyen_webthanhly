@@ -7,6 +7,9 @@
   --surface: #f6ecdc;
   --border: #dfceb7;
   --accent: #b38b60;
+  --brand-primary: #764D32;
+  --on-brand: #fff;
+  --on-surface: #171717;
   --radius: 0.25rem;
 }
 
@@ -27,6 +30,7 @@ body { margin: 0; background: var(--background); color: var(--foreground); font-
 @media (min-width: 768px) { .container-site { width: min(100% - 6rem, 70rem); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 .besties-site h1, .besties-site h2 { color: var(--foreground); }
+.besties-site .methods, .besties-site .branch-group { color: var(--on-surface); }
 .besties-site .service-page { background: var(--background); color: var(--foreground); }
 .besties-site .methods, .besties-site .branch-group { background: var(--surface); }
-.besties-site .methods__tab.is-active, .besties-site .step__num, .besties-site .consignment-button { background: var(--foreground); color: var(--background); }
+.besties-site .methods__tab.is-active, .besties-site .step__num, .besties-site .consignment-button { background: var(--brand-primary); color: var(--on-brand); }

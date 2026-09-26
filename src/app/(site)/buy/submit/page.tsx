@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { ConsignmentForm } from "@/components/consignments/consignment-form";
 import { getSiteConfig } from "@/content/site";
 import { prisma } from "@/lib/db/client";
+import { getPublicShop } from "@/lib/shop/public";
 
-export const metadata: Metadata = { title: "Gửi yêu cầu thu mua | Besties Club", description: "Gửi thông tin mặt hàng để shop xem xét báo giá thu mua; chưa phải thỏa thuận bán." };
+export async function generateMetadata(): Promise<Metadata> { const shop = await getPublicShop(); return { title: "Gửi yêu cầu thu mua", description: `Gửi thông tin mặt hàng để ${shop.shopName} xem xét báo giá thu mua; chưa phải thỏa thuận bán.`, robots: { index: false, follow: false } }; }
 export const dynamic = "force-dynamic";
 
 export default async function BuySubmitPage() {

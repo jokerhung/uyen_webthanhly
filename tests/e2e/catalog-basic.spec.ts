@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 test("catalog navigation, empty-or-populated state and invalid detail", async ({ page, request }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Hàng đang bán" }).click();
-  await expect(page).toHaveURL(/\/items$/);
+  await expect(page).toHaveURL(/#hang-dang-ban$/);
+  await page.goto("/items");
   await expect(page.getByRole("heading", { name: "Hàng đang bán" })).toBeVisible();
   await expect(page.getByRole("main").first()).toBeVisible();
   const missing = await request.get(`/items/not-a-real-product-${Date.now()}`);
