@@ -1,5 +1,5 @@
 /* Native disclosure: independent of JavaScript hydration and overlay positioning. */
-.catalog-shop--native { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; align-items: start; }
+.catalog-shop--native { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 68px auto; column-gap: 20px; align-items: start; }
 .catalog-shop--native .catalog-shop__toolbar { grid-column: 1; grid-row: 1; min-height: 44px; margin-bottom: 24px; }
 .catalog-shop--native > .catalog-shop__results { grid-column: 1 / -1; grid-row: 2; }
 .catalog-filter-disclosure { grid-column: 2; grid-row: 1 / span 2; z-index: 1; }

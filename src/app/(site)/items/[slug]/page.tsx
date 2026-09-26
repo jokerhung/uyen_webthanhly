@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getSiteConfig } from "@/content/site";
+import { brand } from "@/content/brand";
 import { catalogImageUrl, getCatalogItem } from "@/lib/catalog/queries";
 import { indexingAllowed } from "@/lib/catalog/indexing";
 import "@/components/catalog/catalog.css";
@@ -23,6 +24,11 @@ export default async function CatalogDetail({ params }: Props) {
   const contactPhone = phone && /^\+?[\d\s().-]{8,25}$/.test(phone) ? phone.replace(/[^\d+]/g, "") : null;
   return <div className="catalog container-site"><div className="catalog__detail" style={{ marginTop: "2rem" }}>
     <div className="catalog__gallery">{item.images.length ? item.images.map(image => <div className="catalog__media" key={image.id}><Image unoptimized src={catalogImageUrl(item.slug, image.id)} alt={image.altText} width={800} height={1000} /></div>) : <div className="catalog__media">Chưa có ảnh</div>}</div>
-    <div><h1>{item.name}</h1><dl><dt>Giá bán</dt><dd className="catalog__price">{money(item.salePrice)}</dd><dt>Danh mục</dt><dd>{item.categoryRecord.name}</dd><dt>Tình trạng</dt><dd>{item.condition}</dd></dl><h2 className="catalog__name">Mô tả</h2><p className="catalog__description">{item.description}</p>{contactPhone ? <a className="catalog__call" href={`tel:${contactPhone}`}>Gọi shop: {phone}</a> : <p className="catalog__empty" style={{ marginTop: "2rem" }}>Shop chưa xác nhận số điện thoại liên hệ. Vui lòng quay lại sau.</p>}</div>
+    <div><h1>{item.name}</h1><dl><dt>Giá bán</dt><dd className="catalog__price">{money(item.salePrice)}</dd><dt>Danh mục</dt><dd>{item.categoryRecord.name}</dd><dt>Tình trạng</dt><dd>{item.condition}</dd></dl><h2 className="catalog__name">Mô tả</h2><p className="catalog__description">{item.description}</p>
+      <div className="catalog__contacts">
+        <a className="catalog__contact" href={brand.facebook} target="_blank" rel="noopener noreferrer">Liên hệ qua Facebook</a>
+        <a className="catalog__contact catalog__contact--outline" href={`https://zalo.me/${(contactPhone ?? brand.phone).replace(/[^\d]/g, "")}`} target="_blank" rel="noopener noreferrer">Liên hệ qua Zalo</a>
+      </div>
+    </div>
   </div></div>;
 }

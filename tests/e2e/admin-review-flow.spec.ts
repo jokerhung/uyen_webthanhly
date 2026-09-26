@@ -3,7 +3,7 @@ import { randomUUID, randomBytes, scryptSync } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const listing = { genderId: "gender-unisex", seasonId: "season-summer", category: "ao", materialId: "material-cotton", sizeId: "size-m", brandId: "brand-no-brand", priceOptionId: "price-120000" };
+const listing = { genderId: "gender-unisex", seasonId: "season-summer", category: "ao", materialId: "material-cotton", sizeId: "size-m", brandId: "brand-no-brand", salePrice: 120000 };
 test.afterAll(async () => { await prisma.$disconnect(); });
 test.describe("admin review in disposable database", () => {
   test.skip(process.env.RUN_ADMIN_DB_E2E !== "1", "Only run against an isolated disposable DB");

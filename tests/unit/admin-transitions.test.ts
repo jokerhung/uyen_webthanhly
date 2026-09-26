@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { statusActionSchema } from "../../src/lib/admin/status-transitions";
 import { activeItemStatuses, statusActionTargets } from "../../src/lib/admin/item-status";
-const listing = { genderId: "gender-unisex", seasonId: "season-summer", category: "ao", materialId: "material-cotton", sizeId: "size-m", brandId: "brand-no-brand", priceOptionId: "price-120000" };
+const listing = { genderId: "gender-unisex", seasonId: "season-summer", category: "ao", materialId: "material-cotton", sizeId: "size-m", brandId: "brand-no-brand", salePrice: 120000 };
 
 describe("admin item transitions", () => {
-  it("requires all seven lookup choices and rejects a client-supplied price", () => {
+  it("requires lookup choices and a positive integer sale price", () => {
     expect(statusActionSchema.safeParse({ action: "approve", expectedStatus: "RECEIVED", ...listing }).success).toBe(true);
     for (const field of Object.keys(listing)) {
       expect(statusActionSchema.safeParse({ action: "approve", expectedStatus: "RECEIVED", ...listing, [field]: "" }).success).toBe(false);
     }
-    expect(statusActionSchema.safeParse({ action: "approve", expectedStatus: "RECEIVED", ...listing, salePrice: 1 }).success).toBe(false);
+    expect(statusActionSchema.safeParse({ action: "approve", expectedStatus: "RECEIVED", ...listing, salePrice: 0 }).success).toBe(false);
     expect(statusActionSchema.safeParse({ action: "approve", expectedStatus: "APPROVED", ...listing }).success).toBe(false);
   });
   it("allows skipped states but disallows injected actor", () => {
