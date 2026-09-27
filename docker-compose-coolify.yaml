@@ -51,9 +51,12 @@ services:
       start_period: 20s
 
   minio:
-    # Only use a reviewed, published immutable image providing minio-healthcheck.
-    # The local-only webkygui/minio digest is NOT a production-ready registry image.
-    image: ${MINIO_IMAGE:?Set an audited published MinIO registry image pinned by sha256 digest}
+    # Build on the Coolify server from pinned source/base images, not a local image.
+    # This Dockerfile and its healthcheck currently support linux/amd64 only.
+    platform: linux/amd64
+    build:
+      context: ./docker/minio
+      dockerfile: Dockerfile
     restart: unless-stopped
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
