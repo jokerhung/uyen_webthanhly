@@ -1,5 +1,5 @@
-# Next.js and Prisma run in a single container; database migration is an explicit
-# deployment step, not an automatic side effect of starting the web server.
+# Shared image for the web service and the Compose one-shot migration/admin job.
+# The web command itself does not migrate or seed the database.
 FROM node:24-bookworm-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
@@ -21,6 +21,7 @@ COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/src ./src
 COPY --from=build --chown=node:node /app/prisma ./prisma
 COPY --from=build --chown=node:node /app/scripts/next-with-env.mjs ./scripts/next-with-env.mjs
+COPY --from=build --chown=node:node /app/scripts/coolify-init-admin.mjs ./scripts/coolify-init-admin.mjs
 RUN mkdir -p /data/consignments && chown -R node:node /data
 USER node
 EXPOSE 3000

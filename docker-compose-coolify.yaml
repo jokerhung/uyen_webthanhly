@@ -37,6 +37,45 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      app-init:
+        condition: service_completed_successfully
+
+  # One-shot jobs: a failed initialization prevents the web process from starting.
+  app-init:
+    build:
+      context: .
+      dockerfile: docker/coolify-app.Dockerfile
+    restart: "no"
+    command: ["sh", "-ec", "node node_modules/prisma/build/index.js migrate deploy && node scripts/coolify-init-admin.mjs"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Set the PostgreSQL URL using the db service hostname and URL-encoded password}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  minio-init:
+    platform: linux/amd64
+    build:
+      context: ./docker/minio
+      dockerfile: Dockerfile.mc
+      target: bootstrap
+    restart: "no"
+    environment:
+      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set a dedicated MinIO root username}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set a strong MinIO root password}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set the scoped object-only app access key}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set the scoped object-only app secret key}
+    tmpfs:
+      - /tmp:rw,mode=1777
+    depends_on:
+      minio:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine

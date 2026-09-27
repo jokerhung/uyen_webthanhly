@@ -14,7 +14,7 @@ RUN git init . && git remote add origin https://github.com/minio/mc.git \
 RUN go mod download && go build -mod=readonly -trimpath -buildvcs=false -tags kqueue \
     -ldflags "$(MC_RELEASE=DEVELOPMENT go run buildscripts/gen-ldflags.go)" -o /out/mc .
 
-FROM docker.io/library/debian:bookworm-slim@sha256:f3034a6ec3c1205360777c4aae76234998866ad18806ae62b63a3f84ccad782b
+FROM docker.io/library/debian:bookworm-slim@sha256:f3034a6ec3c1205360777c4aae76234998866ad18806ae62b63a3f84ccad782b AS client
 COPY --from=build /out/mc /usr/local/bin/mc
 COPY --from=build /src/LICENSE /licenses/LICENSE
 COPY --from=build /src/CREDITS /licenses/CREDITS
@@ -24,3 +24,14 @@ ENTRYPOINT ["/usr/local/bin/mc"]
 LABEL org.opencontainers.image.source="https://github.com/minio/mc" \
       org.opencontainers.image.revision="77f82e18b5401a65958f1619df6ebb994634bd88" \
       org.opencontainers.image.licenses="AGPL-3.0-only"
+
+FROM node:24-bookworm-slim AS bootstrap
+COPY --from=client /usr/local/bin/mc /usr/local/bin/mc
+COPY --from=client /licenses /licenses
+COPY app-policy.json /bootstrap/app-policy.json
+COPY coolify-init.mjs /bootstrap/init.mjs
+USER 10001:10001
+ENTRYPOINT ["node", "/bootstrap/init.mjs"]
+
+# Preserve the original default image for existing local mc workflows.
+FROM client AS default-client

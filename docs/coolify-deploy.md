@@ -1,14 +1,71 @@
-# Coolify Compose deployment — template, not production approval
+# Coolify: one Compose deployment
 
-`docker-compose-coolify.yaml` defines an app, PostgreSQL 16 and a **private** MinIO service. Missing required secrets block Compose rendering. MinIO now builds directly on the Coolify server using `docker/minio/Dockerfile`, with pinned source and base images and explicit `linux/amd64`; no local Docker image, GHCR publication, or `MINIO_IMAGE` variable is needed for this Compose file. The separate local-development Compose is unchanged. **Server-side building is not production security approval: dependency review, IAM/bootstrap and backup requirements still apply.** No deployment was performed as part of this configuration change.
+Use the Git repository, Docker Compose build pack and `/docker-compose-coolify.yaml`.
+This is one deployment entry point, **not a standalone YAML detached from the repo**:
+Dockerfiles, Prisma migrations and bootstrap scripts must remain in Git.
+Builds run on the Coolify server (linux/amd64); no GHCR or local image is needed.
 
-For this server-build variant, omit `MINIO_IMAGE` from step 2 below and replace the registry-image provisioning in step 3 with review/build of the checked-in MinIO Dockerfile on an amd64 Coolify server. Retain the healthcheck, private bucket, scoped IAM and all other checks in step 3. The registry-image guidance below applies only if switching back to a prebuilt image. Reload Compose from Git after pushing this file; do not rely on edits to Coolify's rendered Git-backed Compose view. New volumes start empty: do not copy local data or run the synthetic development seed for a fresh production deployment.
+## Configure once
 
-1. Create a Coolify *Docker Compose* resource from the repository and choose `docker-compose-coolify.yaml` as its compose file. Set the app service's domain in Coolify to the verified public HTTPS `SITE_URL`, targeting **app port 3000**. Do not publish db port 5432, S3 port 9000 or console port 9001. Confirm Coolify's proxy actually reaches the app; this YAML intentionally has no host ports or automatic domain labels (they depend on the specific Coolify installation).
-2. Configure **runtime** environment variables in Coolify: `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `SITE_URL`, `ADMIN_ALLOWED_ORIGINS`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_IMAGE`. The URL must use `db:5432`, matching `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`; percent-encode special characters in the URL password (example form only: `postgresql://USER:ENCODED_PASSWORD@db:5432/DB?schema=public`). Set `ADMIN_ALLOWED_ORIGINS` to the public HTTPS origin(s); `SITE_URL` is the canonical HTTPS site URL. Optional runtime `PUBLIC_INDEXING_ENABLED=false`, `PRIVACY_POLICY_REVIEWED=false` remain conservative. Never place secrets in committed YAML, build args or `NEXT_PUBLIC_*`. Verify which values Coolify makes available at **Compose interpolation time**, not just to a running container.
-3. Provision an **independently reviewed and published** immutable `MINIO_IMAGE=registry/minio@sha256:<64 hex>` containing `/usr/local/bin/minio-healthcheck`; the local Docker image ID/digest from development is not a registry-pinned production artifact. See `docs/minio-operations.md` for the upstream archive/security caveats and production gate. The bucket and IAM users are **not** created by Compose. Only after MinIO is healthy, use an audited `mc` and `docker/minio/bootstrap.sh` in a controlled one-time operation to create the private `besties-media` bucket and separate limited app/migration users. Store only app credentials in the app service; never pass root/migration credentials to it. A changed bucket name requires editing/reviewing the static policies and bootstrap script as well as YAML.
-4. Back up PostgreSQL, MinIO's full data volume **and** the app private volume (logos/favicon and legacy files) to off-host versioned storage; conduct a restore to an isolated stack. Named volumes are not backups. Existing local data are **not** copied into this new stack automatically. For an existing shop, transfer a coordinated DB snapshot, local private logo/favicon bytes and already-verified MinIO objects/IAM after a writer freeze and compare object SHA-256 + DB keys. Never point a fresh empty volume at an existing DB or flip drivers without reconciliation; see `docs/minio-migration-plan.md`.
-5. Run `npx prisma migrate deploy` inside the **app image** against the intended DB as a deliberate, reviewed one-off step after backup and before routing traffic. The web startup does not run schema migrations, seed or storage migration automatically. Start app only after DB schema, bucket/IAM, secrets and object verification are ready. For existing deployments, plan downtime/cutover separately; a new blank database is not a migration of the local development database.
-6. Confirm HTTPS admin mutation origin, API image responses, local logo/favicon responses, private/anonymous-denied S3 access, image upload and rollback, backup restoration, and cleanup worker scheduling. The storage cleanup script is **not** scheduled by this Compose file; run `node scripts/cleanup-images.mjs --driver minio --apply` on an explicitly managed schedule only after backups/permissions review. Do not enable search indexing or accepting personal data until policy/site review.
+Set runtime variables in Coolify (never commit secrets or enable their Buildtime flag):
 
-The application image is built from `docker/coolify-app.Dockerfile`; `.dockerignore` prevents ignored `.env`, `.private` secrets/snapshots, and host `node_modules` from entering the build context. The root layout now defers both DB-backed metadata and shop settings to request time (`connection()`), allowing builds without a database and avoiding frozen shop settings in the image. A local Docker image build and Prisma OpenSSL 3 engine inspection passed; `npm ci` still reported **5 dependency advisories (2 moderate, 3 high)**, which require review/remediation before production approval. The three pre-existing Turbopack dynamic-file-tracing warnings for `images.ts` still appear in the build; review output size. Docker Compose interpolation was validated with *placeholder* values only; no live Coolify deployment or app runtime smoke was performed. Local logo/favicon data reside in `/data/consignments` (persistent `app_private_data`); product objects reside in private `minio_data`. Do not run `docker compose down -v` for this resource.
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
+- `DATABASE_URL=postgresql://USER:URL_ENCODED_PASSWORD@db:5432/DB?schema=public`, matching those values.
+- `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD` and separate `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
+- `SITE_URL=https://besties.sk2.io.vn`, `ADMIN_ALLOWED_ORIGINS=https://besties.sk2.io.vn`.
+- On a **fresh database only**, `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` (12+ characters).
+  Existing admins are preserved; these may be empty on redeploy. Remove the bootstrap
+  password after the first successful deployment.
+- `PRIVACY_POLICY_REVIEWED=true` only after operator approval; default false.
+  `PUBLIC_INDEXING_ENABLED` defaults to false.
+- Intake limits default to 1–10 items/receipt, 5 images/item, 5 MiB/image. Override
+  `MIN_CONSIGNMENT_ITEMS`, `MAX_CONSIGNMENT_ITEMS`, `MAX_IMAGES_PER_ITEM`,
+  `MAX_IMAGE_BYTES` as needed. The API also caps complete requests at 55 MiB.
+
+Disable automatic build-argument injection in Advanced. Assign the HTTPS domain to
+**app**, internal port **3000** only. Init services, PostgreSQL and MinIO must not
+have public domains. No host database/S3/console ports are published.
+
+## What Deploy does
+
+1. Builds the app, MinIO and the pinned-source mc initialization image on the server.
+2. Starts PostgreSQL and MinIO and waits for healthchecks.
+3. `app-init` runs `prisma migrate deploy`, then creates the first admin only if the
+   admin table is empty. It never runs a synthetic seed or resets accounts.
+4. `minio-init` creates `besties-media` if absent, checks privacy and the exact
+   object-only policy (ignoring descriptive statement IDs), creates the app user
+   if absent and attaches its policy. Existing passwords are not reset. Public
+   buckets, unexpected policies/groups and disabled users fail closed. A unique
+   temporary object verifies Put/Get/Delete access and is removed afterward.
+5. The app starts only after both init services exit successfully.
+
+An exited init container with exit code **0** is expected. If either job fails,
+inspect logs, fix configuration, and Deploy again; do not bypass dependencies.
+Serialize deployments: concurrent bootstrap runs are unsupported. Migration
+conflicts/failures require operator review.
+
+CLI equivalent with secrets already configured:
+
+```sh
+docker compose -f docker-compose-coolify.yaml up -d --build
+```
+
+On Coolify, reload Compose from Git and click Deploy. Do not treat the rendered
+Git-backed Compose view as the source of truth.
+
+## Data safety and limitations
+
+Keep the same Coolify resource and named volumes: `postgres_data`, `minio_data`,
+`app_private_data`. Never use `down -v`. A different resource creates new volumes;
+local data are not copied automatically. Changing PostgreSQL environment variables
+does not change an existing database role/password.
+
+Back up database and all volumes to independent storage before migrations and
+verify restores. Compose does not configure backups, migrate historical images,
+provision migration-only IAM, schedule image cleanup or perform security audits.
+Pinned builds do not guarantee production security/future patch support; retain
+the review requirements in `minio-operations.md`.
+
+This update has YAML and JavaScript syntax validation only until the fresh-stack
+and repeat-deploy flows are verified in a disposable environment. Do not treat
+the previously deployed manual bootstrap as proof of this new initialization flow.
