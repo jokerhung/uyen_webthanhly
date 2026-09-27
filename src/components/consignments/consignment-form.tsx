@@ -87,7 +87,7 @@ export function ConsignmentForm({ intakeType, minimumItems, maxImagesPerItem, ma
         if (response.status === 429) throw new Error("Bạn gửi quá nhiều lần. Vui lòng thử lại sau.");
         if (response.status === 413) throw new Error("Dung lượng ảnh vượt giới hạn. Vui lòng chọn ảnh nhỏ hơn.");
         if (response.status === 400 || response.status === 422) throw new Error("Thông tin hoặc ảnh không hợp lệ. Vui lòng kiểm tra và chỉnh sửa trước khi gửi lại.");
-        throw new Error("Chưa thể gửi phiếu. Bạn có thể thử lại; hệ thống sẽ không tạo phiếu trùng nếu yêu cầu trước đã được lưu.");
+        throw new Error(`Chưa thể gửi phiếu (HTTP ${response.status}). Bạn có thể thử lại; hệ thống sẽ không tạo phiếu trùng nếu yêu cầu trước đã được lưu.`);
       }
       if (!body || typeof body !== "object" || !("public_code" in body) || typeof body.public_code !== "string" || !body.public_code) throw new Error("Không nhận được mã phiếu. Vui lòng thử lại với cùng nội dung để kiểm tra kết quả.");
       setPublicCode(body.public_code);
