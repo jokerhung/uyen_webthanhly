@@ -18,8 +18,16 @@ export async function POST(request: Request): Promise<Response> {
   const allowedOrigin = new URL(request.url).origin;
   const origin = request.headers.get("origin");
   const fetchSite = request.headers.get("sec-fetch-site");
+  // A reverse proxy can expose an internal HTTP request URL to Next.js.
+  // Trust only the operator-configured public HTTPS origin, not forwarded headers.
+  let matchesPublicOrigin = false;
+  try {
+    const site = new URL(process.env.SITE_URL ?? "");
+    matchesPublicOrigin = site.protocol === "https:" && !site.username && !site.password
+      && site.pathname === "/" && !site.search && !site.hash && origin === site.origin;
+  } catch { /* Missing or malformed configuration does not grant another origin. */ }
   // Modern browsers send both headers; trusted non-browser clients may omit them.
-  if ((origin && origin !== allowedOrigin) || (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none"))
+  if ((origin && origin !== allowedOrigin && !matchesPublicOrigin) || (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none"))
     return json({ error: "Yêu cầu khác nguồn không được phép." }, 403);
   const key = request.headers.get("idempotency-key") ?? "";
   if (!contentType.startsWith("multipart/form-data;") || !/^[a-zA-Z0-9_-]{16,128}$/.test(key))
