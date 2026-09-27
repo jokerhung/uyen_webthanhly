@@ -17,7 +17,7 @@ export const getCatalogItem = cache(async (slug: string) => {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) return null;
   return prisma.item.findFirst({
     where: { ...catalogWhere, slug },
-    select: { slug: true, name: true, description: true, condition: true, salePrice: true, categoryRecord: { select: { name: true } }, images: { orderBy: { sortOrder: "asc" }, select: { id: true, altText: true } } },
+    select: { slug: true, name: true, description: true, condition: true, salePrice: true, categoryRecord: { select: { name: true } }, brand: { select: { label: true } }, size: { select: { label: true } }, material: { select: { label: true } }, images: { orderBy: { sortOrder: "asc" }, select: { id: true, altText: true } } },
   });
 });
 

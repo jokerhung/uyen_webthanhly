@@ -13,9 +13,9 @@ const sections = [
   { slug: "shop", label: "Thông tin shop", enabled: true },
   { slug: "announcement", label: "Chữ chạy", enabled: true },
   { slug: "categories", label: "Loại sản phẩm", enabled: true },
-  { slug: "brands", label: "Nhãn hiệu", enabled: false },
-  { slug: "sizes", label: "Kích thước", enabled: false },
-  { slug: "materials", label: "Chất liệu", enabled: false },
+  { slug: "brands", label: "Nhãn hiệu", enabled: true },
+  { slug: "sizes", label: "Kích thước", enabled: true },
+  { slug: "materials", label: "Chất liệu", enabled: true },
 ] as const;
 
 export function SettingsNavigation() {

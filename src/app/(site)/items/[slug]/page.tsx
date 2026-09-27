@@ -22,7 +22,7 @@ export default async function CatalogDetail({ params }: Props) {
   const shop = await getPublicShop();
   return <div className="catalog container-site"><div className="catalog__detail" style={{ marginTop: "2rem" }}>
     <div className="catalog__gallery">{item.images.length ? item.images.map(image => <div className="catalog__media" key={image.id}><Image unoptimized src={catalogImageUrl(item.slug, image.id)} alt={image.altText} width={800} height={1000} /></div>) : <div className="catalog__media">Chưa có ảnh</div>}</div>
-    <div><h1>{item.name}</h1><dl><dt>Giá bán</dt><dd className="catalog__price">{money(item.salePrice)}</dd><dt>Danh mục</dt><dd>{item.categoryRecord.name}</dd><dt>Tình trạng</dt><dd>{item.condition}</dd></dl><h2 className="catalog__name">Mô tả</h2><p className="catalog__description">{item.description}</p>
+    <div><h1>{item.name}</h1><dl><dt>Giá bán</dt><dd className="catalog__price">{money(item.salePrice)}</dd><dt>Danh mục</dt><dd>{item.categoryRecord.name}</dd>{item.brand && <><dt>Nhãn hiệu</dt><dd>{item.brand.label}</dd></>}{item.size && <><dt>Kích thước</dt><dd>{item.size.label}</dd></>}{item.material && <><dt>Chất liệu</dt><dd>{item.material.label}</dd></>}<dt>Tình trạng</dt><dd>{item.condition}</dd></dl><h2 className="catalog__name">Mô tả</h2><p className="catalog__description">{item.description}</p>
       <div className="catalog__contacts">
         <a className="catalog__contact" href={shop.facebookUrl} target="_blank" rel="noopener noreferrer">Liên hệ qua Facebook</a>
         <a className="catalog__contact catalog__contact--outline" href={shopZaloUrl(shop)} target="_blank" rel="noopener noreferrer">Liên hệ qua Zalo ({shop.phone})</a>

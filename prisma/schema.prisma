@@ -81,6 +81,7 @@ model ListingOption {
   id String @id @db.VarChar(100)
   kind String @db.VarChar(20)
   label String @db.VarChar(100)
+  normalizedLabel String @map("normalized_label") @db.VarChar(100)
   amount Decimal? @db.Decimal(14, 0)
   active Boolean @default(true)
   sortOrder Int @default(0) @map("sort_order")
@@ -91,6 +92,7 @@ model ListingOption {
   brandItems Item[] @relation("Brand")
   priceItems Item[] @relation("Price")
 
+  @@unique([kind, normalizedLabel])
   @@index([kind, active, sortOrder])
   @@map("listing_options")
 }

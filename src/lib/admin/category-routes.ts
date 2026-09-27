@@ -15,7 +15,7 @@ export async function checkCategoryMutation(request: Request) {
   } catch { return { response: categoryJson({ error: "JSON không hợp lệ." }, 400) }; }
 }
 export function revalidateCategoryConsumers() {
-  for (const path of ["/", "/items", "/consign/submit", "/buy/submit", "/admin/items", "/admin/consignments", "/admin/settings/categories"]) revalidatePath(path);
+  for (const path of ["/", "/items", "/consign/submit", "/buy/submit", "/admin/items", "/admin/consignments", "/admin/settings/categories", "/admin/settings/brands", "/admin/settings/sizes", "/admin/settings/materials"]) revalidatePath(path);
   revalidatePath("/items/[slug]", "page");
   revalidatePath("/admin/items/[id]", "page");
 }

@@ -11,9 +11,9 @@ async function main() {
 
   await prisma.$transaction(async (tx) => {
     for (const category of [
-      { slug: 'ao', name: 'Áo', sortOrder: 10 },
-      { slug: 'ao-khoac', name: 'Áo khoác', sortOrder: 40 },
-      { slug: 'phu-kien', name: 'Phụ kiện', sortOrder: 70 },
+      { slug: 'ao', name: 'Áo', normalizedName: 'áo', sortOrder: 10 },
+      { slug: 'ao-khoac', name: 'Áo khoác', normalizedName: 'áo khoác', sortOrder: 40 },
+      { slug: 'phu-kien', name: 'Phụ kiện', normalizedName: 'phụ kiện', sortOrder: 70 },
     ]) {
       await tx.itemCategory.upsert({ where: { slug: category.slug }, update: {}, create: category });
     }

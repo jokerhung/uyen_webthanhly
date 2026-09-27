@@ -8,16 +8,16 @@ Trang `/admin/settings/brands` quản lý `ListingOption` có `kind=brand`: thê
 
 ## Công việc
 
-- [ ] Tái sử dụng giao diện danh mục Phase 3, hiển thị tên, trạng thái và số mặt hàng tham chiếu.
-- [ ] Tạo endpoint/service cho `brands`, khóa cứng `kind=brand` ở server. Payload không được chuyển nhóm thành mùa, giới tính hoặc giá.
-- [ ] Thêm tên nhãn hiệu 1–100 ký tự; ID sinh ở server, amount luôn null; chuẩn hóa và chống trùng trong cùng nhóm.
-- [ ] Migration chuẩn hóa nhãn/unique `(kind, normalizedLabel)` sau khi kiểm tra các bản ghi hiện có; dùng chung cho các nhóm ListingOption ở phase tiếp theo.
-- [ ] Xóa/khôi phục bằng active, giữ nguyên khóa ngoại `Item.brandId`, ghi audit theo actor.
-- [ ] Cập nhật combobox thuộc tính admin, bộ lọc nhãn hiệu và tên nhãn trên card/chi tiết. Nhãn cũ inactive vẫn hiển thị cho hàng đã gán.
+- [x] Tái sử dụng giao diện danh mục Phase 3, hiển thị tên, trạng thái và số mặt hàng tham chiếu.
+- [x] Tạo endpoint/service cho `brands`, khóa cứng `kind=brand` ở server. Payload không được chuyển nhóm thành mùa, giới tính hoặc giá.
+- [x] Thêm tên nhãn hiệu 1–100 ký tự; ID sinh ở server, amount luôn null; chuẩn hóa và chống trùng trong cùng nhóm.
+- [x] Migration chuẩn hóa nhãn/unique `(kind, normalizedLabel)` sau khi kiểm tra các bản ghi hiện có; dùng chung cho các nhóm ListingOption ở phase tiếp theo.
+- [x] Xóa/khôi phục bằng active, giữ nguyên khóa ngoại `Item.brandId`, ghi audit theo actor.
+- [x] Cập nhật combobox thuộc tính admin, bộ lọc nhãn hiệu và tên nhãn trên card/chi tiết. Nhãn cũ inactive vẫn hiển thị cho hàng đã gán.
 
 ## Đầu ra và nghiệm thu
 
-- [ ] Thêm một nhãn hiệu → chọn được khi chỉnh sửa/đăng bán, lọc được sản phẩm đã gán.
-- [ ] Xóa nhãn hiệu đang dùng không làm mất sản phẩm hoặc tên nhãn hiệu trên card.
-- [ ] Khôi phục sử dụng lại ID; tên trùng không phân biệt hoa/thường bị chặn.
-- [ ] Endpoint brand không sửa/xóa được size/material bằng cách truyền ID khác nhóm.
+- [x] Thêm một nhãn hiệu → chọn được khi chỉnh sửa/đăng bán, lọc được sản phẩm đã gán.
+- [x] Xóa nhãn hiệu đang dùng không làm mất sản phẩm hoặc tên nhãn hiệu trên card.
+- [x] Khôi phục sử dụng lại ID; tên trùng không phân biệt hoa/thường bị chặn.
+- [x] Endpoint brand không sửa/xóa được size/material bằng cách truyền ID khác nhóm.
