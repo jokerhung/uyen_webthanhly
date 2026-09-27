@@ -9,7 +9,8 @@ const montserrat = Montserrat({ subsets: ["latin", "vietnamese"], variable: "--f
 
 export async function generateMetadata(): Promise<Metadata> {
   const shop = await getPublicShop();
-  return { title: { default: `${shop.shopName} — Ký gửi & thu mua`, template: `%s | ${shop.shopName}` }, description: `Nền tảng giới thiệu dịch vụ ký gửi, thu mua và quản lý mặt hàng của ${shop.shopName}.`, robots: { index: indexingAllowed(), follow: indexingAllowed() } };
+  const icons = { icon: shop.logoKey ? { url: `/api/shop/favicon/${shop.logoKey}`, type: "image/png", sizes: "64x64" } : { url: "/favicon.ico" } };
+  return { icons, title: { default: `${shop.shopName} — Ký gửi & thu mua`, template: `%s | ${shop.shopName}` }, description: `Nền tảng giới thiệu dịch vụ ký gửi, thu mua và quản lý mặt hàng của ${shop.shopName}.`, robots: { index: indexingAllowed(), follow: indexingAllowed() } };
 }
 
 function contrastColor(hex: string) {

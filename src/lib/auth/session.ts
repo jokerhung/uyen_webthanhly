@@ -59,7 +59,17 @@ export function isSameOriginMutation(request: Request): boolean {
   const fetchSite = request.headers.get("sec-fetch-site");
   if (!origin || origin === "null" || (fetchSite && fetchSite !== "same-origin")) return false;
   try {
-    return new URL(origin).origin === new URL(request.url).origin;
+    const source = new URL(origin);
+    if (source.username || source.password || source.origin !== origin) return false;
+    if (source.origin === new URL(request.url).origin) return true;
+    // Reverse proxies may expose an internal HTTP request URL. Only trust
+    // explicitly configured public origins, never arbitrary forwarded headers.
+    return (process.env.ADMIN_ALLOWED_ORIGINS ?? "").split(",").some(value => {
+      try {
+        const allowed = new URL(value.trim());
+        return allowed.protocol === "https:" && !allowed.username && !allowed.password && allowed.pathname === "/" && !allowed.search && !allowed.hash && allowed.origin === source.origin;
+      } catch { return false; }
+    });
   } catch {
     return false;
   }

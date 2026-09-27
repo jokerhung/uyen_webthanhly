@@ -7,12 +7,14 @@ import { LogoutButton } from "./logout-button";
 import "./admin-sidebar.css";
 
 const settings = [
-  { label: "Thông tin shop", href: "/admin/settings/shop", available: true },
-  { label: "Chữ chạy", href: "/admin/settings/announcement", available: true },
-  { label: "Loại sản phẩm", href: "/admin/settings/categories", available: true },
-  { label: "Nhãn hiệu", href: "/admin/settings/brands", available: true },
-  { label: "Kích thước", href: "/admin/settings/sizes", available: true },
-  { label: "Chất liệu", href: "/admin/settings/materials", available: true },
+  { label: "Thông tin shop", href: "/admin/settings/shop" },
+  { label: "Thông báo", href: "/admin/settings/announcement" },
+];
+const catalogs = [
+  { label: "Loại sản phẩm", href: "/admin/settings/categories" },
+  { label: "Nhãn hiệu", href: "/admin/settings/brands" },
+  { label: "Kích thước", href: "/admin/settings/sizes" },
+  { label: "Chất liệu", href: "/admin/settings/materials" },
 ];
 
 export function AdminSidebar() {
@@ -26,9 +28,16 @@ export function AdminSidebar() {
         <Link className="admin-sidebar__link" href="/admin/items" aria-current={active("/admin/items") ? "page" : undefined}><Boxes size={18} />Mặt hàng</Link>
         <Link className="admin-sidebar__link" href="/admin/consignments" aria-current={active("/admin/consignments") ? "page" : undefined}><ClipboardList size={18} />Phiếu tiếp nhận</Link>
         <div className="admin-sidebar__group"><Settings size={18} />Cấu hình</div>
-        <div className="admin-sidebar__settings">{settings.map(item => item.available
-          ? <Link className="admin-sidebar__link" key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label}</Link>
-          : <span className="admin-sidebar__unavailable" key={item.href} aria-disabled="true">{item.label}<small>Sắp triển khai</small></span>)}</div>
+        <div className="admin-sidebar__settings">
+          <details className="admin-sidebar__catalog" open={settings.some(item => active(item.href))}>
+            <summary>Website</summary>
+            <div className="admin-sidebar__catalog-links">{settings.map(item => <Link className="admin-sidebar__link" key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label}</Link>)}</div>
+          </details>
+          <details className="admin-sidebar__catalog" open={catalogs.some(item => active(item.href))}>
+            <summary>Danh mục</summary>
+            <div className="admin-sidebar__catalog-links">{catalogs.map(item => <Link className="admin-sidebar__link" key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{item.label}</Link>)}</div>
+          </details>
+        </div>
       </nav>
       <div className="admin-sidebar__logout"><LogoutButton /></div>
     </div>

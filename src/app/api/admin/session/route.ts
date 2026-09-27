@@ -11,7 +11,7 @@ const MAX_BODY_BYTES = 4096;
 const json = (body: object, status: number) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const unauthorized = () => json({ error: "Invalid credentials" }, 401);
 
-async function readSmallJson(request: Request): Promise<unknown> {
+async function readSmallBody(request: Request): Promise<string> {
   const reader = request.body?.getReader();
   if (!reader) throw new Error("Missing body");
   const chunks: Uint8Array[] = [];
@@ -23,7 +23,7 @@ async function readSmallJson(request: Request): Promise<unknown> {
     if (size > MAX_BODY_BYTES) { await reader.cancel(); throw new Error("Body too large"); }
     chunks.push(value);
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 export async function GET(): Promise<Response> {
@@ -37,11 +37,28 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const isForm = (request.headers.get("content-type") ?? "").toLowerCase().startsWith("application/x-www-form-urlencoded");
+  if (!isForm) return loginJson(request);
+  if (!isSameOriginMutation(request)) return new Response(null, { status: 303, headers: { Location: "/admin/login?error=origin", "Cache-Control": "no-store" } });
+  let fields: URLSearchParams;
+  try { fields = new URLSearchParams(await readSmallBody(request)); }
+  catch { return new Response(null, { status: 303, headers: { Location: "/admin/login?error=invalid", "Cache-Control": "no-store" } }); }
+  const headers = new Headers(request.headers);
+  headers.set("content-type", "application/json");
+  headers.delete("content-length");
+  const result = await loginJson(new Request(request.url, { method: "POST", headers, body: JSON.stringify({ email: fields.get("email"), password: fields.get("password") }) }));
+  const responseHeaders = new Headers(result.headers);
+  responseHeaders.delete("content-type");
+  responseHeaders.set("Location", result.ok ? "/admin/consignments" : `/admin/login?error=${result.status === 429 ? "rate" : result.status === 503 ? "service" : "invalid"}`);
+  return new Response(null, { status: 303, headers: responseHeaders });
+}
+
+async function loginJson(request: Request): Promise<Response> {
   if (!isSameOriginMutation(request)) return json({ error: "Forbidden" }, 403);
   if (!(request.headers.get("content-type") ?? "").toLowerCase().startsWith("application/json")) return json({ error: "Invalid request" }, 415);
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) return json({ error: "Invalid request" }, 413);
   let body: unknown;
-  try { body = await readSmallJson(request); }
+  try { body = JSON.parse(await readSmallBody(request)); }
   catch { return json({ error: "Invalid request" }, 400); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return unauthorized();
   const { email, password } = body as Record<string, unknown>;

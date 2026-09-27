@@ -25,7 +25,7 @@ export async function PATCH(request: Request): Promise<Response> {
     input = JSON.parse(text);
   } catch { return json({ error: "JSON không hợp lệ." }, 400); }
   const parsed = announcementInputSchema.safeParse(input);
-  if (!parsed.success) return json({ error: "Chữ chạy không hợp lệ.", fieldErrors: parsed.error.flatten().fieldErrors }, 422);
+  if (!parsed.success) return json({ error: "Thông báo không hợp lệ.", fieldErrors: parsed.error.flatten().fieldErrors }, 422);
   try {
     const result = await updateAnnouncementSettings(parsed.data, admin.id);
     if (result.kind === "conflict") return json({ error: "Cấu hình đã được sửa cùng lúc. Vui lòng tải lại.", settings: await getAnnouncementSettings() }, 409);
@@ -34,6 +34,6 @@ export async function PATCH(request: Request): Promise<Response> {
     return json({ settings: result.settings }, 200);
   } catch (error) {
     console.error("Shop announcement update failed", error instanceof Error ? error.name : "UnknownError");
-    return json({ error: "Không thể lưu chữ chạy." }, 500);
+    return json({ error: "Không thể lưu thông báo." }, 500);
   }
 }

@@ -11,7 +11,7 @@ type FieldErrors = Partial<Record<keyof Values, string>>;
 
 const sections = [
   { slug: "shop", label: "Thông tin shop", enabled: true },
-  { slug: "announcement", label: "Chữ chạy", enabled: true },
+  { slug: "announcement", label: "Thông báo", enabled: true },
   { slug: "categories", label: "Loại sản phẩm", enabled: true },
   { slug: "brands", label: "Nhãn hiệu", enabled: true },
   { slug: "sizes", label: "Kích thước", enabled: true },
@@ -76,7 +76,7 @@ export function AnnouncementSettingsForm({ initialSettings }: { initialSettings:
     if (busy || !changed) return;
     const found: FieldErrors = {};
     if (values.announcementText.length > 500) found.announcementText = "Nội dung không được vượt quá 500 ký tự.";
-    if (values.announcementEnabled && !values.announcementText.trim()) found.announcementText = "Nhập nội dung trước khi bật chữ chạy.";
+    if (values.announcementEnabled && !values.announcementText.trim()) found.announcementText = "Nhập nội dung trước khi bật thông báo.";
     setErrors(found);
     setMessage("");
     if (Object.keys(found).length) return;
@@ -104,7 +104,7 @@ export function AnnouncementSettingsForm({ initialSettings }: { initialSettings:
       const body: unknown = await response.json().catch(() => null);
       if (!response.ok) {
         if (response.status === 422) setErrors(parseFieldErrors(body));
-        setMessage("Không thể lưu chữ chạy. Vui lòng kiểm tra thông tin và thử lại.");
+        setMessage("Không thể lưu thông báo. Vui lòng kiểm tra thông tin và thử lại.");
         return;
       }
       const latest = readSettings(body);
@@ -113,7 +113,7 @@ export function AnnouncementSettingsForm({ initialSettings }: { initialSettings:
       setValues(valuesFrom(latest));
       setErrors({});
       setWarning("");
-      setMessage("Đã lưu cấu hình chữ chạy.");
+      setMessage("Đã lưu cấu hình thông báo.");
     } catch {
       setMessage("Không thể tải hoặc lưu cấu hình. Vui lòng kiểm tra kết nối rồi thử lại.");
     } finally {
@@ -123,13 +123,13 @@ export function AnnouncementSettingsForm({ initialSettings }: { initialSettings:
 
   return <form onSubmit={submit} noValidate className="grid gap-6 rounded border border-neutral-200 bg-white p-4 sm:p-7">
     <div className="grid gap-2">
-      <label htmlFor="announcementText" className="text-sm font-medium">Nội dung chữ chạy</label>
+      <label htmlFor="announcementText" className="text-sm font-medium">Nội dung thông báo</label>
       <textarea id="announcementText" name="announcementText" rows={4} maxLength={500} disabled={busy} value={values.announcementText} onChange={event => {
         setValues(previous => ({ ...previous, announcementText: event.target.value }));
         setErrors(previous => ({ ...previous, announcementText: undefined }));
         setMessage("");
       }} aria-invalid={!!errors.announcementText} aria-describedby={`announcement-help${errors.announcementText ? " announcementText-error" : ""}`} className="min-h-28 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-800 disabled:opacity-60" />
-      <p id="announcement-help" className="text-sm text-neutral-600">Chỉ văn bản thuần · {values.announcementText.length}/500 ký tự. Cần nhập nội dung khi bật chữ chạy.</p>
+      <p id="announcement-help" className="text-sm text-neutral-600">Chỉ văn bản thuần · {values.announcementText.length}/500 ký tự. Cần nhập nội dung khi bật thông báo.</p>
       {errors.announcementText && <p id="announcementText-error" className="text-sm text-red-700">{errors.announcementText}</p>}
     </div>
     <div>
@@ -139,17 +139,17 @@ export function AnnouncementSettingsForm({ initialSettings }: { initialSettings:
           setErrors(previous => ({ ...previous, announcementEnabled: undefined }));
           setMessage("");
         }} aria-invalid={!!errors.announcementEnabled} aria-describedby={errors.announcementEnabled ? "announcementEnabled-error" : undefined} className="h-5 w-5 accent-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-800" />
-        Bật chữ chạy trên trang công khai
+        Bật thông báo trên trang công khai
       </label>
       {errors.announcementEnabled && <p id="announcementEnabled-error" className="mt-2 text-sm text-red-700">{errors.announcementEnabled}</p>}
     </div>
     <div className="grid gap-2 border-t border-neutral-200 pt-5">
       <h3 className="font-semibold">Xem trước</h3>
       {values.announcementEnabled
-        ? <div role="region" aria-label="Xem trước chữ chạy" className="max-w-full overflow-hidden border px-4 py-3 text-sm" style={{ backgroundColor: "var(--brand-primary)", color: "var(--on-brand)", borderColor: "var(--border)" }}>
-          <p className="break-words leading-relaxed tracking-widest">{values.announcementText.trim() ? <>✦ {values.announcementText}</> : "Nhập nội dung để xem trước chữ chạy."}</p>
+        ? <div role="region" aria-label="Xem trước thông báo" className="max-w-full overflow-hidden border px-4 py-3 text-sm" style={{ backgroundColor: "var(--brand-primary)", color: "var(--on-brand)", borderColor: "var(--border)" }}>
+          <p className="break-words leading-relaxed tracking-widest">{values.announcementText.trim() ? <>✦ {values.announcementText}</> : "Nhập nội dung để xem trước thông báo."}</p>
         </div>
-        : <p className="rounded border border-neutral-200 bg-neutral-100 px-4 py-3 text-sm text-neutral-700">Chữ chạy đang tắt; thanh sẽ không hiển thị.</p>}
+        : <p className="rounded border border-neutral-200 bg-neutral-100 px-4 py-3 text-sm text-neutral-700">Thông báo đang tắt; thanh sẽ không hiển thị.</p>}
       <p className="text-xs text-neutral-600">Xem trước dùng màu thương hiệu đã lưu trong Thông tin shop; nội dung đứng yên và không xử lý mã HTML.</p>
     </div>
     <div className="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-5">

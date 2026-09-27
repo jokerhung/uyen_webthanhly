@@ -11,6 +11,13 @@
 .admin-sidebar__group { display: flex; align-items: center; gap: 10px; padding: 24px 12px 10px; font-size: 14px; font-weight: 600; }
 .admin-sidebar__settings { margin-left: 20px; border-left: 1px solid #e5e5e5; padding-left: 8px; }
 .admin-sidebar__settings .admin-sidebar__link { font-size: 13px; }
+.admin-sidebar__catalog > summary { min-height: 44px; padding: 10px 12px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; list-style: none; }
+.admin-sidebar__catalog > summary::-webkit-details-marker { display: none; }
+.admin-sidebar__catalog > summary::before { content: "▸"; display: inline-block; width: 16px; transition: transform 150ms; }
+.admin-sidebar__catalog[open] > summary::before { transform: rotate(90deg); }
+.admin-sidebar__catalog > summary:hover { background: #f5f5f5; }
+.admin-sidebar__catalog > summary:focus-visible { outline: 2px solid #262626; outline-offset: 2px; }
+.admin-sidebar__catalog-links { margin-left: 12px; border-left: 1px solid #e5e5e5; padding-left: 8px; }
 .admin-sidebar__unavailable { display: grid; gap: 3px; padding: 10px 12px; font-size: 13px; color: #888; }
 .admin-sidebar__unavailable small { font-size: 10px; color: #aaa; }
 .admin-sidebar__logout { margin-top: auto; padding-top: 28px; }

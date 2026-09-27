@@ -5,6 +5,6 @@ export const announcementInputSchema = z.object({
   announcementText: z.string().max(500, "Nội dung tối đa 500 ký tự.").transform(value => value.trim()),
   announcementEnabled: z.boolean(),
 }).strict().refine(value => !value.announcementEnabled || value.announcementText.length > 0, {
-  path: ["announcementText"], message: "Nhập nội dung trước khi bật chữ chạy.",
+  path: ["announcementText"], message: "Nhập nội dung trước khi bật thông báo.",
 });
 export type AnnouncementInput = z.output<typeof announcementInputSchema>;

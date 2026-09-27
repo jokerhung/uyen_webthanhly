@@ -179,6 +179,7 @@ model AdminUser {
 }
 
 model ShopSettings {
+  logoKey         String?   @map("logo_key") @db.VarChar(100)
   id              Int       @id @default(1)
   shopName        String    @map("shop_name") @db.VarChar(120)
   slogan          String    @db.VarChar(200)

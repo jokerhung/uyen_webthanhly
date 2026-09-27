@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import "./shop-home-preview.css";
 import type { ShopSettings } from "@/lib/shop/settings";
 import { normalizeVietnamesePhone } from "@/lib/validation/settlement";
 
@@ -181,15 +182,21 @@ export function ShopSettingsForm({ initialSettings }: { initialSettings: ShopSet
           {fieldError(errors[field], field)}
         </div>)}
       </div>
-      <div aria-label="Xem trước màu sắc và độ tương phản" className="rounded border border-neutral-300 p-4" style={validColors ? { backgroundColor: values.backgroundColor, color: textOn(values.backgroundColor) } : undefined}>
-        <p className="mb-2 text-sm font-semibold">Xem trước màu sắc</p>
-        {validColors ? <div className="rounded p-4" style={{ backgroundColor: values.surfaceColor, color: textOn(values.surfaceColor) }}>
-          <p className="mb-2 font-semibold">{values.shopName || "Tên shop"}</p>
-          <p className="mb-3 text-sm">{values.slogan || "Slogan của shop"}</p>
-          <span className="inline-block rounded px-4 py-2 text-sm font-semibold" style={{ backgroundColor: values.primaryColor, color: textOn(values.primaryColor) }}>Nút mẫu</span>
-          <p className="mt-3 text-xs">Tương phản chữ/nền: {contrast(values.backgroundColor, textOn(values.backgroundColor)).toFixed(1)}:1 · chữ/bề mặt: {contrast(values.surfaceColor, textOn(values.surfaceColor)).toFixed(1)}:1 · chữ/nút: {contrast(values.primaryColor, textOn(values.primaryColor)).toFixed(1)}:1.</p>
-          {contrast(values.primaryColor, values.surfaceColor) < 3 && <p className="mt-2 text-xs font-semibold">Lưu ý: màu nút và màu bề mặt tương phản thấp ({contrast(values.primaryColor, values.surfaceColor).toFixed(1)}:1). Hãy cân nhắc chọn màu dễ phân biệt hơn.</p>}
-        </div> : <p className="text-sm">Nhập đủ ba mã màu #RRGGBB hợp lệ để xem trước.</p>}
+      <div aria-label="Xem trước trang chủ" className="min-w-0">
+        <p className="mb-3 text-sm font-semibold">Xem trước trang chủ</p>
+        {validColors ? <>
+          <div className="shop-home-preview" style={{ backgroundColor: values.backgroundColor, color: textOn(values.backgroundColor) }}>
+            {initialSettings.announcementEnabled && <div className="shop-home-preview__ticker" style={{ backgroundColor: values.primaryColor, color: textOn(values.primaryColor) }}>✦ {initialSettings.announcementText} ✦</div>}
+            <div className="shop-home-preview__hero">
+              <p className="shop-home-preview__title">{values.shopName || "Tên shop"}</p>
+              <p className="shop-home-preview__slogan">{values.slogan || "Slogan của shop"}</p>
+              <div className="shop-home-preview__menu" aria-label="Menu minh họa">{["Giới thiệu", "Ký gửi", "Thu mua", "Xem quyết toán"].map(label => <span key={label}>{label}</span>)}</div>
+              <p className="shop-home-preview__scroll">Cuộn tiếp để xem hàng đang bán<br /><span aria-hidden="true">↓</span></p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-neutral-600">Tương phản chữ/nền: {contrast(values.backgroundColor, textOn(values.backgroundColor)).toFixed(1)}:1 · chữ/bề mặt: {contrast(values.surfaceColor, textOn(values.surfaceColor)).toFixed(1)}:1 · chữ/thông báo: {contrast(values.primaryColor, textOn(values.primaryColor)).toFixed(1)}:1.</p>
+          {contrast(values.primaryColor, values.surfaceColor) < 3 && <p className="mt-2 text-xs text-neutral-600">Màu thương hiệu và bề mặt có độ tương phản thấp ({contrast(values.primaryColor, values.surfaceColor).toFixed(1)}:1).</p>}
+        </> : <p className="text-sm">Nhập đủ ba mã màu #RRGGBB hợp lệ để xem trước.</p>}
       </div>
     </fieldset>
     <div className="flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-5">

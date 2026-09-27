@@ -27,7 +27,9 @@ test.describe("managed listing options (disposable database)", () => {
     for (const option of options) {
       const endpoint = `${origin}/api/admin/settings/${option.route}`;
       await page.goto(`${origin}/admin/settings/shop`);
-      await page.getByRole("navigation", { name: "Quản trị" }).getByRole("link", { name: option.label }).click();
+      const adminNav = page.getByRole("navigation", { name: "Quản trị" });
+      await adminNav.getByText("Danh mục", { exact: true }).click();
+      await adminNav.getByRole("link", { name: option.label }).click();
       await expect(page).toHaveURL(new RegExp(`/admin/settings/${option.route}$`));
       await page.getByRole("button", { name: `Thêm ${option.label.toLowerCase()}`, exact: true }).click();
       const dialog = page.getByRole("dialog", { name: `Thêm ${option.label.toLowerCase()}` });

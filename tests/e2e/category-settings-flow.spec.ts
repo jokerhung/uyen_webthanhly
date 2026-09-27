@@ -23,7 +23,9 @@ test.describe("category settings on isolated database", () => {
     const headers = { Origin: origin, "Content-Type": "application/json" };
     expect((await page.request.post(`${origin}/api/admin/session`, { headers, data: { email, password } })).status()).toBe(200);
     await page.goto(`${origin}/admin/settings/shop`);
-    await page.getByRole("navigation", { name: "Quản trị" }).getByRole("link", { name: "Loại sản phẩm" }).click();
+    const adminNav = page.getByRole("navigation", { name: "Quản trị" });
+    await adminNav.getByText("Danh mục", { exact: true }).click();
+    await adminNav.getByRole("link", { name: "Loại sản phẩm" }).click();
     await expect(page).toHaveURL(/\/admin\/settings\/categories$/);
     await expect(page.getByRole("heading", { name: "Loại sản phẩm", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Thêm loại sản phẩm", exact: true }).click();
