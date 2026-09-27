@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { catalogWhere } from "@/lib/catalog/queries";
-import { readPrivateImage } from "@/lib/storage/images";
+import { readProductImage, ProductImageNotFound } from "@/lib/storage/product-images";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,8 +15,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   });
   if (!image) return notFound();
   try {
-    const bytes = await readPrivateImage(image.storageKey);
+    const bytes = await readProductImage(image.storageKey);
     const mimeType = image.storageKey.endsWith(".webp") ? "image/webp" : image.storageKey.endsWith(".png") ? "image/png" : "image/jpeg";
     return new Response(new Uint8Array(bytes), { headers: { "Content-Type": mimeType, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'" } });
-  } catch { return notFound(); }
+  } catch (error) {
+    if (error instanceof ProductImageNotFound || (error instanceof Error && "code" in error && error.code === "ENOENT")) return notFound();
+    console.error("Public product image storage unavailable", error instanceof Error ? error.name : "UnknownError");
+    return new Response(null, { status: 503, headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
+  }
 }

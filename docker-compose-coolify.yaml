@@ -1,0 +1,75 @@
+# Coolify Docker Compose resource. Read docs/coolify-deploy.md before enabling.
+# Do not attach this stack to an existing database/bucket without a verified backup
+# and an explicitly planned data migration. No service publishes a host port.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/coolify-app.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: ${DATABASE_URL:?Set the PostgreSQL URL using the db service hostname and URL-encoded password}
+      SITE_URL: ${SITE_URL:?Set the public HTTPS website URL}
+      ADMIN_ALLOWED_ORIGINS: ${ADMIN_ALLOWED_ORIGINS:?Set trusted public HTTPS admin origin(s)}
+      PUBLIC_INDEXING_ENABLED: ${PUBLIC_INDEXING_ENABLED:-false}
+      PRIVACY_POLICY_REVIEWED: ${PRIVACY_POLICY_REVIEWED:-false}
+      CONSIGNMENT_STORAGE_DIR: /data/consignments
+      PRODUCT_IMAGE_STORAGE_DRIVER: minio
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: besties-media
+      S3_FORCE_PATH_STYLE: "true"
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set the scoped object-only app access key}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set the scoped object-only app secret key}
+    expose:
+      - "3000"
+    volumes:
+      # Required even with MinIO: logo/favicon and any historical private local files.
+      - app_private_data:/data/consignments
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set the database username}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a strong database password}
+      POSTGRES_DB: ${POSTGRES_DB:?Set the database name}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  minio:
+    # Only use a reviewed, published immutable image providing minio-healthcheck.
+    # The local-only webkygui/minio digest is NOT a production-ready registry image.
+    image: ${MINIO_IMAGE:?Set an audited published MinIO registry image pinned by sha256 digest}
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set a dedicated MinIO root username}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set a strong MinIO root password}
+      MINIO_REGION_NAME: us-east-1
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/minio-healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  postgres_data:
+  minio_data:
+  app_private_data:

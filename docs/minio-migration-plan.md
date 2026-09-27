@@ -1,6 +1,6 @@
 # Kế hoạch chuyển quản lý ảnh sang MinIO chạy Docker
 
-Ngày lập: 27/09/2026. Trạng thái: kế hoạch, chưa triển khai hoặc di chuyển dữ liệu.
+Ngày lập: 27/09/2026. Trạng thái: adapter, routes, cleanup và migration đã triển khai. Trên **máy phát triển local**, Compose MinIO từ source-build đã chạy healthy, bucket private và hai tài khoản IAM riêng được tạo, 4 ảnh sản phẩm được copy và xác minh SHA-256, vẫn đúng sau restart; 2 file logo/khác không được copy. Có snapshot local và PostgreSQL dump đã restore thử vào DB tạm. **Đây không phải deployment production**: image server/mc chỉ build local, chưa được phê duyệt/audit hay phát hành; backup chưa ở thiết bị khác; đã thử restore toàn bộ volume MinIO/IAM trên máy local sau khi tạm dừng app theo xác nhận người vận hành. Đã cutover **chỉ ứng dụng phát triển local** sang driver MinIO và kiểm tra 4 URL ảnh cũ khớp SHA-256, logo/favicon vẫn local. Chưa kiểm thử end-to-end upload/xóa với transaction DB trên instance này. Xem [runbook và bằng chứng kiểm thử](minio-operations.md). Checkbox nghiệm thu cuối cùng vẫn để trống.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -18,7 +18,7 @@ Chưa triển khai upload trực tiếp từ browser tới MinIO, CDN ảnh, pre
 
 ## 2. Hiện trạng đã kiểm tra
 
-- `compose.yaml` có service `db` PostgreSQL 16 và volume `postgres_dev_data`; chưa có MinIO.
+- Tại lúc khảo sát ban đầu, `compose.yaml` chỉ có service `db`; hiện đã thêm service MinIO fail-closed và volume riêng. Service đã kích hoạt **chỉ cho máy phát triển local** bằng image tự build; production chưa được phê duyệt.
 - `src/lib/storage/images.ts` cung cấp `storePrivateImage`, `readPrivateImage`, `deletePrivateImage`, `cleanupPrivateImages`.
 - Root ảnh lấy từ `CONSIGNMENT_STORAGE_DIR`, mặc định `.private/consignments`, nằm ngoài `public/`.
 - Khóa ảnh dạng 64 ký tự hex và đuôi jpg/png/webp; ảnh upload mới được sharp xử lý thành WebP.
@@ -206,4 +206,4 @@ prisma/migrations/...
 docs/minio-operations.md
 ```
 
-Các API upload/đọc/xóa được rà lại đầy đủ nhưng không đổi contract giao diện ngoài những thông báo lỗi cần thiết. Đây là tài liệu kế hoạch; chưa cài Docker image, tạo bucket, sửa secrets hoặc di chuyển/xóa ảnh trong lần làm việc này.
+Các API upload/đọc/xóa được rà lại đầy đủ nhưng không đổi contract giao diện ngoài những thông báo lỗi cần thiết. Đã chạy Compose, tạo bucket/IAM và copy 4 ảnh trên máy phát triển local; không xóa ảnh nguồn hoặc đổi khóa DB. Đây chưa phải cutover ứng dụng hay deployment production.

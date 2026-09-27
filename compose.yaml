@@ -16,5 +16,29 @@ services:
       timeout: 3s
       retries: 10
 
+  # Fail closed until an audited, patched image is pinned by digest.
+  # See docs/minio-operations.md before enabling this service.
+  minio:
+    image: ${MINIO_IMAGE:?Set MINIO_IMAGE to a verified MinIO image at sha256 digest; see docs/minio-operations.md}
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set a unique MinIO root user}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set a strong MinIO root password}
+      MINIO_REGION_NAME: ${S3_REGION:-us-east-1}
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+    # Approved source build embeds a bounded loopback readiness probe.
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/minio-healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
 volumes:
   postgres_dev_data:
+  minio_data:

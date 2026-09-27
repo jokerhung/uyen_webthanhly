@@ -1,0 +1,18 @@
+# Do not send local development state, secrets, snapshots or database dumps to Docker.
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.private
+.next
+node_modules
+coverage
+test-results
+playwright-report
+*.log
+*.tsbuildinfo
+.DS_Store
+# No test or integration fixtures in the deployed application image.
+tests
+docs

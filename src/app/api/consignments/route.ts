@@ -2,7 +2,8 @@ import { createHash, randomBytes } from "node:crypto";
 import { Prisma, IntakeType, type ItemStatus } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import { checkIntakeRateLimit } from "@/lib/db/rate-limit";
-import { cleanupPrivateImages, storePrivateImage } from "@/lib/storage/images";
+import { cleanupProductImages, storeProductImage } from "@/lib/storage/product-images";
+import { queueProductImageCleanup } from "@/lib/storage/product-cleanup";
 import { IntakeValidationError, parseIntake } from "@/lib/validation/intake-multipart";
 
 export const runtime = "nodejs";
@@ -30,10 +31,18 @@ export async function POST(request: Request): Promise<Response> {
   let committed = false;
   let parsedHash: string | undefined;
   try {
-    // Request remains bounded even when a client omits Content-Length.
-    const raw = await request.arrayBuffer();
-    if (raw.byteLength > MAX_REQUEST_BYTES) return json({ error: "Yêu cầu vượt giới hạn dung lượng." }, 413);
-    const formRequest = new Request("http://localhost/intake", { method: "POST", headers: { "content-type": contentType }, body: raw });
+    // Bound memory while reading, even if Content-Length is absent or dishonest.
+    const reader = request.body?.getReader();
+    if (!reader) return json({ error: "Yêu cầu không có dữ liệu." }, 400);
+    const chunks: Uint8Array[] = []; let received = 0;
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      received += chunk.value.byteLength;
+      if (received > MAX_REQUEST_BYTES) { await reader.cancel(); return json({ error: "Yêu cầu vượt giới hạn dung lượng." }, 413); }
+      chunks.push(chunk.value);
+    }
+    const formRequest = new Request("http://localhost/intake", { method: "POST", headers: { "content-type": contentType }, body: Buffer.concat(chunks, received) });
     const parsed = await parseIntake(await formRequest.formData());
     parsedHash = parsed.payloadHash;
     const existing = await prisma.intakeRequest.findUnique({ where: { key }, select: { payloadHash: true, consignment: { select: { publicCode: true } } } });
@@ -56,7 +65,7 @@ export async function POST(request: Request): Promise<Response> {
       try {
         optimized = await sharp(image.bytes, { limitInputPixels: 40_000_000, failOn: "error" }).rotate().resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
       } catch { throw new IntakeValidationError("Ảnh bị hỏng hoặc định dạng không được hỗ trợ."); }
-      const saved = await storePrivateImage(optimized);
+      const saved = await storeProductImage(optimized);
       storedKeys.push(saved.storageKey);
       uploaded.push({ itemIndex: image.itemIndex, sortOrder: image.sortOrder, storageKey: saved.storageKey });
     }
@@ -100,8 +109,11 @@ export async function POST(request: Request): Promise<Response> {
     return json({ error: "Không thể lưu phiếu. Vui lòng thử lại với cùng nội dung." }, 500);
   } finally {
     if (!committed && storedKeys.length) {
-      try { await cleanupPrivateImages(storedKeys); }
-      catch { console.error("Private upload cleanup failed; operational review required."); }
+      const results = await Promise.allSettled(storedKeys.map(async key => {
+        try { await cleanupProductImages([key]); }
+        catch { await queueProductImageCleanup([key]).catch(() => console.error("Private upload cleanup and queue failed; reconciliation required.")); }
+      }));
+      if (results.some(result => result.status === "rejected")) console.error("Private upload cleanup failed; operational review required.");
     }
   }
 }

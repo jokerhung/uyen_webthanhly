@@ -5,7 +5,10 @@ import { z } from "zod";
 import { getAdminSession, isSameOriginMutation } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
 import { getSiteConfig } from "@/content/site";
-import { cleanupPrivateImages, detectImageType, storePrivateImage } from "@/lib/storage/images";
+import { detectImageType } from "@/lib/storage/images";
+import { cleanupProductImages, storeProductImage } from "@/lib/storage/product-images";
+import { queueProductImageCleanup } from "@/lib/storage/product-cleanup";
+import { productImageDriver } from "@/lib/storage/product-image-config";
 
 export const runtime = "nodejs";
 const reply = (body: object, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -48,34 +51,52 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       let optimized: Buffer;
       try { optimized = await sharp(bytes, { limitInputPixels: 40_000_000, failOn: "error" }).rotate().resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true }).webp({ quality: 82 }).toBuffer(); }
       catch { return reply({ error: "Ảnh bị hỏng hoặc không thể đọc." }, 422); }
-      uploaded.push((await storePrivateImage(optimized)).storageKey);
+      uploaded.push((await storeProductImage(optimized)).storageKey);
     }
+    const driver = productImageDriver();
+    // Read immutable logo history before opening the write transaction; fail closed if audit is incomplete.
+    const logoAudit = input.remove.length ? await prisma.adminConfigEvent.findMany({ where: { action: "upload-logo", entityType: "shop_settings" }, select: { before: true, after: true } }) : [];
+    const protectedKeys = new Set(logoAudit.flatMap(event => [event.before, event.after].map(value => value && typeof value === "object" && !Array.isArray(value) && "logoKey" in value ? value.logoKey : "audit-incomplete")).filter((value): value is string => typeof value === "string"));
+    if (protectedKeys.has("audit-incomplete")) return reply({ error: "Lịch sử logo chưa đầy đủ; không thể xóa ảnh." }, 503);
     const result = await prisma.$transaction(async tx => {
       const item = await tx.item.findUnique({ where: { id }, include: { images: true } });
       if (!item) return { kind: "missing" as const };
       if (item.updatedAt.toISOString() !== input.updatedAt) return { kind: "conflict" as const };
       const removed = item.images.filter(image => input.remove.includes(image.id));
       if (removed.length !== new Set(input.remove).size) return { kind: "invalid" as const };
+      if (removed.some(image => protectedKeys.has(image.storageKey)) || await tx.shopSettings.count({ where: { logoKey: { in: removed.map(image => image.storageKey) } } })) return { kind: "protected" as const };
       const count = item.images.length - removed.length + uploaded.length;
       if (count > maxImages || (item.status === "APPROVED" && count < 1)) return { kind: "limit" as const };
       const changed = await tx.item.updateMany({ where: { id, updatedAt: new Date(input.updatedAt) }, data: { updatedAt: new Date() } });
       if (changed.count !== 1) return { kind: "conflict" as const };
       await tx.itemImage.deleteMany({ where: { itemId: id, id: { in: input.remove } } });
+      for (const image of removed) {
+        const existing = await tx.storageCleanupJob.findUnique({ where: { storageKey: image.storageKey }, select: { driver: true } });
+        if (existing && existing.driver !== driver) throw new Error("Cleanup driver conflict; manual storage reconciliation required");
+        await tx.storageCleanupJob.upsert({ where: { storageKey: image.storageKey }, create: { storageKey: image.storageKey, driver }, update: { status: "pending", nextAttemptAt: new Date(), lastError: null } });
+      }
       const order = Math.max(-1, ...item.images.map(image => image.sortOrder)) + 1;
       if (uploaded.length) await tx.itemImage.createMany({ data: uploaded.map((storageKey, index) => ({ itemId: id, storageKey, sortOrder: order + index, altText: item.name })) });
       await tx.itemStatusEvent.create({ data: { itemId: id, fromStatus: item.status, toStatus: item.status, actorAdminId: admin.id, reason: `Cập nhật ảnh: thêm ${uploaded.length}, xóa ${removed.length}.` } });
-      return { kind: "success" as const, removed: removed.map(image => image.storageKey), slug: item.slug };
+      return { kind: "success" as const, slug: item.slug };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-    if (result.kind !== "success") return reply({ error: result.kind === "limit" ? `Tối đa ${maxImages} ảnh; mặt hàng đang bán phải giữ ít nhất một ảnh.` : result.kind === "missing" ? "Không tìm thấy mặt hàng." : result.kind === "invalid" ? "Ảnh không thuộc mặt hàng này." : "Mặt hàng đã thay đổi. Vui lòng tải lại trang." }, result.kind === "conflict" ? 409 : result.kind === "missing" ? 404 : 422);
+    if (result.kind !== "success") return reply({ error: result.kind === "limit" ? `Tối đa ${maxImages} ảnh; mặt hàng đang bán phải giữ ít nhất một ảnh.` : result.kind === "missing" ? "Không tìm thấy mặt hàng." : result.kind === "invalid" ? "Ảnh không thuộc mặt hàng này." : result.kind === "protected" ? "Ảnh này được bảo vệ như logo shop." : "Mặt hàng đã thay đổi. Vui lòng tải lại trang." }, result.kind === "conflict" ? 409 : result.kind === "missing" ? 404 : 422);
     committed = true;
     // The DB removal already revokes both public and admin image URLs.
-    await cleanupPrivateImages(result.removed).catch(() => console.error("Removed image file cleanup requires operational review"));
+    // Durable jobs were committed with the DB deletion; a worker retries failures.
+    // Do not delete inline: the worker rechecks live references and protected logo keys.
     revalidatePath("/"); revalidatePath("/items"); revalidatePath(`/items/${result.slug}`);
     revalidatePath("/admin/items"); revalidatePath(`/admin/items/${id}`); revalidatePath("/admin/consignments", "layout");
     return reply({ success: true });
   } catch (error) {
     return reply({ error: error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034" ? "Có thay đổi đồng thời. Vui lòng tải lại trang." : "Không thể lưu ảnh. Vui lòng tải lại trang để kiểm tra trước khi thử lại." }, error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034" ? 409 : 500);
   } finally {
-    if (!committed) await cleanupPrivateImages(uploaded).catch(() => console.error("Upload rollback requires operational review"));
+    if (!committed && uploaded.length) {
+      const results = await Promise.allSettled(uploaded.map(async key => {
+        try { await cleanupProductImages([key]); }
+        catch { await queueProductImageCleanup([key]).catch(() => console.error("Upload rollback storage and queue unavailable; reconciliation required")); }
+      }));
+      if (results.some(result => result.status === "rejected")) console.error("Upload rollback requires operational review");
+    }
   }
 }

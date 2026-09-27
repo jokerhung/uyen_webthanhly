@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { connection } from "next/server";
 import "./globals.css";
 import { indexingAllowed } from "@/lib/catalog/indexing";
 import { getPublicShop } from "@/lib/shop/public";
@@ -8,6 +9,7 @@ import type { CSSProperties } from "react";
 const montserrat = Montserrat({ subsets: ["latin", "vietnamese"], variable: "--font-montserrat", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
+  await connection(); // Shop metadata comes from the runtime database, not the build environment.
   const shop = await getPublicShop();
   const icons = { icon: shop.logoKey ? { url: `/api/shop/favicon/${shop.logoKey}`, type: "image/png", sizes: "64x64" } : { url: "/favicon.ico" } };
   return { icons, title: { default: `${shop.shopName} — Ký gửi & thu mua`, template: `%s | ${shop.shopName}` }, description: `Nền tảng giới thiệu dịch vụ ký gửi, thu mua và quản lý mặt hàng của ${shop.shopName}.`, robots: { index: indexingAllowed(), follow: indexingAllowed() } };
@@ -19,6 +21,7 @@ function contrastColor(hex: string) {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  await connection(); // Never bake shop settings from a build-time database into the image.
   const shop = await getPublicShop();
   const colors = { "--brand-primary": shop.primaryColor, "--background": shop.backgroundColor, "--surface": shop.surfaceColor, "--foreground": contrastColor(shop.backgroundColor), "--on-brand": contrastColor(shop.primaryColor), "--on-surface": contrastColor(shop.surfaceColor), "--accent": shop.primaryColor, "--border": shop.primaryColor } as CSSProperties;
   return <html lang="vi" className={montserrat.variable} style={colors}><body>{children}</body></html>;
