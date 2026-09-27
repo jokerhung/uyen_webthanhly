@@ -8,6 +8,13 @@ import { storePrivateImage, cleanupPrivateImages, detectImageType } from "@/lib/
 export const runtime = "nodejs";
 const json = (body: object, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 export async function POST(request: Request) {
+  const response = await uploadLogo(request);
+  if (!(request.headers.get("accept") ?? "").includes("text/html")) return response;
+  const result = response.ok ? "success" : response.status === 409 ? "conflict" : response.status === 401 ? "session" : response.status === 403 ? "origin" : response.status === 413 || response.status === 422 ? "invalid" : "error";
+  return new Response(null, { status: 303, headers: { Location: `/admin/settings/shop?logo=${result}#shop-logo`, "Cache-Control": "no-store" } });
+}
+
+async function uploadLogo(request: Request) {
   const admin = await getAdminSession();
   if (!admin) return json({ error: "Chưa đăng nhập." }, 401);
   if (!isSameOriginMutation(request)) return json({ error: "Nguồn yêu cầu không hợp lệ." }, 403);
